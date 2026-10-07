@@ -153,6 +153,11 @@
       "count": 1
     }
   },
+  "src/ScribbleGuessApp.jsx": {
+    "no-unused-vars": {
+      "count": 9
+    }
+  },
   "src/ShapeTranslatorApp.jsx": {
     "no-unused-vars": {
       "count": 2
