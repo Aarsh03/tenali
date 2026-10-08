@@ -421,7 +421,7 @@ export function HintModal({ concept, questionId, questionData, answerData, revea
 
         {/* Panel */}
         <div
-          className="hint-fade-in"
+          className="hint-fade-in" role="dialog" aria-modal="true"
           style={{
             position: 'fixed',
             top: '50%',

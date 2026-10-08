@@ -775,6 +775,17 @@ body:has(.landing-navbar) button[aria-label="Menu"][style*="position: fixed"] {
   cursor: pointer;
   padding: 0;
   transition: all 0.25s ease;
+  position: relative;
+}
+
+.slider-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
 }
 
 .slider-dot.active {

@@ -68,7 +68,7 @@ export default function LandingNavbar({
         >
           <img
             src="/tenali.png"
-            alt="Tenali Raman Mascot"
+            alt=""
             className="landing-nav-logo"
             onError={(e) => {
               e.target.style.display = 'none';
@@ -177,7 +177,7 @@ export default function LandingNavbar({
             type="button"
             className="landing-mobile-toggle"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle mobile menu"
+            aria-label="Toggle mobile menu" aria-expanded={mobileOpen}
           >
             {mobileOpen ? '✕' : '☰'}
           </button>
