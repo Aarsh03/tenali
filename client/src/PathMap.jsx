@@ -1,4 +1,18 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  usePmGraphData,
+  installPmAnswerInterceptor,
+  pmTrackGetStats,
+  pmGetCurrentSuggestedModule,
+  getPmNavigateFn,
+  usePmModuleTracking,
+  pmNodes,
+  pmCatColor,
+  pmNodeById,
+  pmSuccessorMap,
+  pmStarPoints,
+  usePathmapState,
+} from './pathMapHelpers';
 
 /* ─── PathMap Styles ─── */
 const PM_STYLES = `
@@ -106,17 +120,19 @@ const PM_STYLES = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 36px;
-  margin-bottom: 8px;
+  margin: 40px 0 12px;
 }
 .pm-grid-filter {
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
   border: 1.5px solid var(--clr-border, rgba(255, 255, 255, 0.15));
   background: var(--clr-card, rgba(255, 255, 255, 0.05));
   color: var(--clr-text, #fff);
   font-size: 0.85rem;
   outline: none;
+}
+.pm-grid-filter:focus {
+  border-color: var(--clr-accent, #e8864a);
 }
 .pm-hint {
   font-size: 0.8rem;
@@ -125,27 +141,39 @@ const PM_STYLES = `
 }
 .pm-module-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
 }
 .pm-card {
   position: relative;
-  background: var(--clr-card, rgba(255, 255, 255, 0.05));
-  border: 1.5px solid var(--clr-border, rgba(255, 255, 255, 0.12));
+  background: var(--clr-card, rgba(255, 255, 255, 0.04));
+  border: 1.5px solid var(--clr-border, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 14px;
   text-align: left;
   cursor: pointer;
   transition: transform 0.15s, border-color 0.15s, background 0.15s;
   color: var(--clr-text, #fff);
+  font-family: inherit;
 }
 .pm-card:hover {
   transform: translateY(-2px);
-  border-color: var(--dot, var(--clr-accent, #e8864a));
+  border-color: var(--clr-accent, #e8864a);
   background: var(--clr-hover-strong, rgba(255, 255, 255, 0.08));
 }
 .pm-card.dimmed {
   opacity: 0.45;
+}
+.pm-card::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot, var(--clr-accent, #e8864a));
+  display: none;
 }
 .pm-card-badge {
   position: absolute;
@@ -176,260 +204,6 @@ const PM_STYLES = `
   line-height: 1.3;
 }
 `;
-
-// ─── PathMap data & algorithms (unchanged) ───────────────────
-// ─── PathMap graph data (fetched from graph-data.json, same file index.html/path.html use) ───
-let pmNodes = []
-let pmEdges = []
-let pmCatColor = {}
-let pmNodeById = {}
-let pmPrereqMap = {}
-let pmSuccessorMap = {}
-
-let pmGraphDataPromise = null
-
-function pmBuildDerivedMaps() {
-  pmNodeById = Object.fromEntries(pmNodes.map((n) => [n.id, n]))
-  pmPrereqMap = {}
-  pmSuccessorMap = {}
-  pmEdges.forEach(([a, b]) => {
-    ;(pmPrereqMap[b] = pmPrereqMap[b] || []).push(a)
-    ;(pmSuccessorMap[a] = pmSuccessorMap[a] || []).push(b)
-  })
-}
-
-function pmFetchGraphData() {
-  if (!pmGraphDataPromise) {
-    pmGraphDataPromise = fetch('/graph-data.json')
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to load graph-data.json (${res.status})`)
-        return res.json()
-      })
-      .then(({ categories, nodes, edges }) => {
-        pmNodes = nodes
-        pmEdges = edges
-        pmCatColor = Object.fromEntries(Object.entries(categories).map(([id, c]) => [id, c.color]))
-        pmBuildDerivedMaps()
-      })
-  }
-  return pmGraphDataPromise
-}
-
-// React hook — loads the graph data once, reports 'loading' | 'ready' | 'error'
-function usePmGraphData() {
-  const [status, setStatus] = useState(() => (pmNodes.length ? 'ready' : 'loading'))
-
-  useEffect(() => {
-    if (status === 'ready') return
-    let cancelled = false
-    pmFetchGraphData()
-      .then(() => { if (!cancelled) setStatus('ready') })
-      .catch((err) => { if (!cancelled) { console.error(err); setStatus('error') } })
-    return () => { cancelled = true }
-  }, [status])
-
-  return status
-}
-
-// ─── Module Progress Tracker (localStorage-based, easy/medium/hard per module) ───
-// Simple design:
-//  - Every answered question is recorded per moduleId + difficulty (correct/total).
-//  - A module is "complete enough" using a Vachana-style adaptive correct streak:
-//    - 3 consecutive correct answers on medium or hard difficulty, OR
-//    - 5 consecutive correct answers of any difficulty (e.g. easy).
-//    Any wrong answer resets the current active streak.
-//  - Once complete, we look up the module's successors in the prereq graph
-//    (graph-data.json edges) and suggest the first one not yet started.
-const PM_TRACK_KEY = 'tenali_module_tracking'
-
-function pmTrackLoad() {
-  try { return JSON.parse(localStorage.getItem(PM_TRACK_KEY)) || {} } catch { return {} }
-}
-function pmTrackSave(data) {
-  try { localStorage.setItem(PM_TRACK_KEY, JSON.stringify(data)) } catch { /* ignore quota errors */ }
-}
-function pmEmptyModuleStat() {
-  return {
-    easy: { correct: 0, total: 0 },
-    medium: { correct: 0, total: 0 },
-    hard: { correct: 0, total: 0 },
-    correctStreak: []
-  }
-}
-// Listeners let any mounted <PmSuggestIcon/> re-render the instant a new answer is recorded
-const pmTrackListeners = new Set()
-function pmTrackNotify() { pmTrackListeners.forEach((fn) => { try { fn() } catch { } }) }
-
-// Global fetch interceptor to track answers across all quiz apps without touching 30+ quiz files
-let _pmInterceptorInstalled = false;
-function installPmAnswerInterceptor() {
-  if (_pmInterceptorInstalled) return;
-  if (typeof window === 'undefined' || typeof window.fetch !== 'function') return;
-
-  const originalFetch = window.fetch;
-  window.fetch = async function pmInterceptedFetch(input, init) {
-    const response = await originalFetch.apply(this, arguments);
-    try {
-      const url = typeof input === 'string' ? input : (input && input.url) || '';
-      const isCheck = /\/([a-z0-9_-]+)-api\/check/i.test(url) || /\/api\/([a-z0-9_-]+)\/check/i.test(url) || /\/api\/check/i.test(url);
-      if (isCheck) {
-        response.clone().json().then((data) => {
-          if (data && typeof data.correct === 'boolean') {
-            let topic = null;
-            const match = url.match(/\/([a-z0-9_-]+)-api\/check/i);
-            if (match && match[1]) {
-              topic = match[1];
-            }
-            const currentMode = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mode') : null;
-            if ((!topic || !pmNodeById[topic]) && currentMode && pmNodeById[currentMode]) {
-              topic = currentMode;
-            } else if (!topic && currentMode) {
-              topic = currentMode;
-            }
-
-            let diff = 'medium';
-            if (init && typeof init.body === 'string') {
-              try {
-                const b = JSON.parse(init.body);
-                if (b.difficulty && ['easy', 'medium', 'hard'].includes(b.difficulty)) {
-                  diff = b.difficulty;
-                }
-              } catch {}
-            }
-
-            if (topic) {
-              pmTrackAnswer(topic, diff, data.correct);
-            }
-          }
-        }).catch(() => {});
-      }
-    } catch (_e) {
-      // safe fallback
-    }
-    return response;
-  };
-  _pmInterceptorInstalled = true;
-}
-
-// Auto-install on module load in browser
-if (typeof window !== 'undefined') {
-  try { installPmAnswerInterceptor(); } catch {}
-}
-
-function pmTrackAnswer(moduleId, difficulty, isCorrect) {
-  if (!moduleId) return
-  const diff = ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium'
-  const data = pmTrackLoad()
-  const stat = data[moduleId] || pmEmptyModuleStat()
-  if (!Array.isArray(stat.correctStreak)) {
-    stat.correctStreak = []
-  }
-  stat[diff].total += 1
-  if (isCorrect) {
-    stat[diff].correct += 1
-    stat.correctStreak.push(diff)
-  } else {
-    stat.correctStreak = []
-  }
-  data[moduleId] = stat
-  pmTrackSave(data)
-  pmTrackNotify()
-}
-function pmTrackGetStats(moduleId) {
-  const data = pmTrackLoad()
-  return data[moduleId] || pmEmptyModuleStat()
-}
-function pmTrackCorrectTotal(moduleId) {
-  const s = pmTrackGetStats(moduleId)
-  return s.easy.correct + s.medium.correct + s.hard.correct
-}
-function pmTrackThresholdMet(moduleId) {
-  const stat = pmTrackGetStats(moduleId)
-  const streak = stat.correctStreak || []
-  if (streak.length >= 3) {
-    const last3 = streak.slice(-3)
-    if (last3.every((d) => d === 'medium' || d === 'hard')) {
-      return true
-    }
-  }
-  if (streak.length >= 5) {
-    return true
-  }
-  return false
-}
-function pmTrackRemaining(moduleId) {
-  if (pmTrackThresholdMet(moduleId)) return 0
-  const stat = pmTrackGetStats(moduleId)
-  const streak = stat.correctStreak || []
-  
-  // Count how many of the last elements of the streak are medium or hard
-  let N = 0
-  for (let i = streak.length - 1; i >= 0; i--) {
-    if (streak[i] === 'medium' || streak[i] === 'hard') {
-      N++
-    } else {
-      break
-    }
-  }
-  N = Math.min(N, 3)
-  
-  const pathA = Math.max(0, 3 - N)
-  const pathB = Math.max(0, 5 - streak.length)
-  
-  return Math.min(pathA, pathB)
-}
-function pmTrackDots(moduleId) {
-  const stat = pmTrackGetStats(moduleId)
-  const streak = stat.correctStreak || []
-  const hasEasy = streak.includes('easy')
-  const totalDots = hasEasy ? 5 : 3
-  const filledDots = Math.min(streak.length, totalDots)
-  
-  return (
-    <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center', marginLeft: 6 }}>
-      {Array.from({ length: totalDots }).map((_, idx) => (
-        <span
-          key={idx}
-          style={{
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            backgroundColor: idx < filledDots ? '#F08C46' : 'transparent',
-            border: idx < filledDots ? '1px solid #F08C46' : '1px solid #8a8078',
-            display: 'inline-block',
-            transition: 'all 0.2s ease',
-          }}
-        />
-      ))}
-    </span>
-  )
-}
-function pmGetKnownFromStorage() {
-  try {
-    const r = localStorage.getItem('tenali_pathmap_known')
-    return new Set(r ? JSON.parse(r) : [])
-  } catch {
-    return new Set()
-  }
-}
-
-function pmGetCurrentSuggestedModule() {
-  if (!pmNodes.length) return null
-  const known = pmGetKnownFromStorage()
-  const isCompleted = (id) => known.has(id) || pmTrackThresholdMet(id)
-  
-  const allNodeIds = new Set(pmNodes.map(n => n.id))
-  const sortedIds = pmTopoSort(allNodeIds)
-  
-  for (const id of sortedIds) {
-    if (isCompleted(id)) continue
-    const prereqs = pmPrereqMap[id] || []
-    if (prereqs.every(p => isCompleted(p))) {
-      return pmNodeById[id] || null
-    }
-  }
-  return null
-}
 
 const QUEST_BANNER_STYLES = `
 .quest-banner-row {
@@ -500,19 +274,15 @@ const QUEST_BANNER_STYLES = `
 .quest-banner-btn:hover .quest-banner-arrow {
   transform: translateX(2px);
 }
-`
+`;
 
 function PmQuestBanner({ onSelect }) {
-  const graphStatus = usePmGraphData()
-  const [suggested, setSuggested] = useState(null)
+  const graphStatus = usePmGraphData();
+  const suggested = useMemo(() => {
+    return graphStatus === 'ready' ? pmGetCurrentSuggestedModule() : null;
+  }, [graphStatus]);
 
-  useEffect(() => {
-    if (graphStatus === 'ready') {
-      setSuggested(pmGetCurrentSuggestedModule())
-    }
-  }, [graphStatus])
-
-  if (!suggested) return null
+  if (!suggested) return null;
 
   return (
     <div className="quest-banner-row">
@@ -529,77 +299,60 @@ function PmQuestBanner({ onSelect }) {
         <div className="quest-banner-arrow">➔</div>
       </button>
     </div>
-  )
+  );
 }
 
-// Picks the next module to suggest: first successor (per graph-data.json edges)
-// that hasn't been started yet, falling back to the first successor overall.
-// AFTER
-function pmTrackNextModule(moduleId) {
-  const successors = pmSuccessorMap[moduleId] || []
-  if (successors.length > 0) {
-    return successors.map((id) => pmNodeById[id]).filter(Boolean)
-  }
-  
-  // Fallback: suggest the next uncompleted node in the entire graph
-  const nextGlobalNode = pmGetCurrentSuggestedModule()
-  if (nextGlobalNode && nextGlobalNode.id !== moduleId) {
-    return [nextGlobalNode]
-  }
-  
-  // If everything is completed, return a special virtual node
-  return [{ id: 'dashboard', label: '🎉 Go to Dashboard' }]
-}
+function PmTrackDots({ moduleId }) {
+  const stat = pmTrackGetStats(moduleId);
+  const streak = stat.correctStreak || [];
+  const hasEasy = streak.includes('easy');
+  const totalDots = hasEasy ? 5 : 3;
+  const filledDots = Math.min(streak.length, totalDots);
 
-// Registered by the top-level App component so any nested quiz can navigate
-// to a suggested module without prop-drilling.
-let pmNavigateFn = null;
-export function setPmNavigateFn(fn) { pmNavigateFn = fn; }
-
-// Hook: call from any quiz component with its moduleId (graph-data.json node id).
-// Returns { record(difficulty, isCorrect), thresholdMet, nextModule }.
-function usePmModuleTracking(moduleId) {
-  const graphStatus = usePmGraphData()
-  const [, bump] = useState(0)
-  useEffect(() => {
-    const fn = () => bump((n) => n + 1)
-    pmTrackListeners.add(fn)
-    return () => pmTrackListeners.delete(fn)
-  }, [])
-  const record = useCallback((difficulty, isCorrect) => {
-    pmTrackAnswer(moduleId, difficulty, isCorrect)
-  }, [moduleId])
-  const thresholdMet = moduleId ? pmTrackThresholdMet(moduleId) : false
-   const nextModules = (graphStatus === 'ready' && moduleId && thresholdMet) ? pmTrackNextModule(moduleId) : []
-  return { record, thresholdMet, nextModules }
+  return (
+    <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center', marginLeft: 6 }}>
+      {Array.from({ length: totalDots }).map((_, idx) => (
+        <span
+          key={idx}
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: '50%',
+            backgroundColor: idx < filledDots ? '#F08C46' : 'transparent',
+            border: idx < filledDots ? '1px solid #F08C46' : '1px solid #8a8078',
+            display: 'inline-block',
+            transition: 'all 0.2s ease',
+          }}
+        />
+      ))}
+    </span>
+  );
 }
 
 // ─── PmSuggestIcon: floating bottom-right "next module" button ───────────────
-// Grayed out / inert until the threshold is reached for the current module,
-// then lights up and, on click, navigates straight to the suggested module.
-
 function PmSuggestIcon({ moduleId, onNavigate }) {
-  const graphStatus = usePmGraphData()
-  const { thresholdMet, nextModules } = usePmModuleTracking(moduleId)
+  const graphStatus = usePmGraphData();
+  const { thresholdMet, nextModules } = usePmModuleTracking(moduleId);
+  const pmNavigateFn = getPmNavigateFn();
 
   useEffect(() => {
-    installPmAnswerInterceptor()
-  }, [])
+    installPmAnswerInterceptor();
+  }, []);
 
-  if (!moduleId) return null
-  if (graphStatus === 'loading') return null
-  if (graphStatus === 'ready' && !pmNodeById[moduleId]) return null
+  if (!moduleId) return null;
+  if (graphStatus === 'loading') return null;
+  if (graphStatus === 'ready' && !pmNodeById[moduleId]) return null;
 
-  const active = thresholdMet && nextModules.length > 0
+  const active = thresholdMet && nextModules.length > 0;
   const doNav = (modId) => {
     if (modId === 'dashboard') {
-      if (onNavigate) onNavigate(null)
-      else if (pmNavigateFn) pmNavigateFn(null)
+      if (onNavigate) onNavigate(null);
+      else if (pmNavigateFn) pmNavigateFn(null);
     } else {
-      if (onNavigate) onNavigate(modId)
-      else if (pmNavigateFn) pmNavigateFn(modId)
+      if (onNavigate) onNavigate(modId);
+      else if (pmNavigateFn) pmNavigateFn(modId);
     }
-  }
+  };
 
   return (
     <div style={{
@@ -637,152 +390,25 @@ function PmSuggestIcon({ moduleId, onNavigate }) {
         }}>
           <span style={{ fontSize: '0.8rem' }}>🔒</span>
           {(() => {
-            if (!pmNodeById[moduleId]) return 'Next module'
+            if (!pmNodeById[moduleId]) return 'Next module';
             return (
               <>
                 Unlock next
-                {pmTrackDots(moduleId)}
+                <PmTrackDots moduleId={moduleId} />
               </>
-            )
+            );
           })()}
         </button>
       )}
     </div>
-  )
-}
-
-function pmGetSubgraphNodes(goalIdList) {
-  const visited = new Set()
-  const stack = [...goalIdList]
-  while (stack.length) {
-    const cur = stack.pop()
-    if (visited.has(cur)) continue
-    visited.add(cur)
-    ;(pmPrereqMap[cur] || []).forEach((p) => { if (!visited.has(p)) stack.push(p) })
-  }
-  return visited
-}
-
-function pmTopoSort(nodeSet) {
-  const inDeg = {}
-  const adj = {}
-  nodeSet.forEach((n) => { inDeg[n] = 0; adj[n] = [] })
-  pmEdges.forEach(([a, b]) => {
-    if (nodeSet.has(a) && nodeSet.has(b)) { adj[a].push(b); inDeg[b]++ }
-  })
-  const queue = [...nodeSet].filter((n) => inDeg[n] === 0).sort()
-  const order = []
-  while (queue.length) {
-    queue.sort()
-    const n = queue.shift()
-    order.push(n)
-    ;(adj[n] || []).forEach((m) => { inDeg[m]--; if (inDeg[m] === 0) queue.push(m) })
-  }
-  return order
-}
-
-function pmComputePath(goalIds) {
-  if (!goalIds || !goalIds.length) return []
-  return pmTopoSort(pmGetSubgraphNodes(goalIds))
-}
-
-// ─── PathMap svg utils ────────────────────────────────────────
-function pmStarPoints(cx, cy, r) {
-  const points = []
-  for (let i = 0; i < 10; i++) {
-    const rad = i % 2 === 0 ? r : r * 0.45
-    const ang = (Math.PI / 5) * i - Math.PI / 2
-    points.push(`${cx + rad * Math.cos(ang)},${cy + rad * Math.sin(ang)}`)
-  }
-  return points.join(' ')
-}
-
-// ─── PathMap hooks & state synchronization ─────────────────────
-let _pmGoalIds = (() => {
-  try {
-    const r = localStorage.getItem('tenali_pathmap_goal')
-    return r ? JSON.parse(r) : []
-  } catch {
-    return []
-  }
-})()
-
-let _pmKnown = (() => {
-  try {
-    const r = localStorage.getItem('tenali_pathmap_known')
-    return new Set(r ? JSON.parse(r) : [])
-  } catch {
-    return new Set()
-  }
-})()
-
-const pmStateListeners = new Set()
-function notifyPmStateChange() {
-  pmStateListeners.forEach((fn) => fn())
-}
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'tenali_pathmap_goal') {
-      try { _pmGoalIds = e.newValue ? JSON.parse(e.newValue) : [] } catch { _pmGoalIds = [] }
-      notifyPmStateChange()
-    } else if (e.key === 'tenali_pathmap_known') {
-      try { _pmKnown = new Set(e.newValue ? JSON.parse(e.newValue) : []) } catch { _pmKnown = new Set() }
-      notifyPmStateChange()
-    }
-  })
-}
-
-function usePathmapState() {
-  const pmStatus = usePmGraphData()
-  const [, bump] = useState(0)
-
-  useEffect(() => {
-    const fn = () => bump((n) => n + 1)
-    pmStateListeners.add(fn)
-    return () => pmStateListeners.delete(fn)
-  }, [])
-
-  const goalIds = _pmGoalIds
-  const known = _pmKnown
-
-  const setGoal = useCallback((ids) => {
-    _pmGoalIds = ids
-    try { localStorage.setItem('tenali_pathmap_goal', JSON.stringify(ids)) } catch {}
-    notifyPmStateChange()
-  }, [])
-
-  const clearGoal = useCallback(() => {
-    _pmGoalIds = []
-    try { localStorage.setItem('tenali_pathmap_goal', JSON.stringify([])) } catch {}
-    notifyPmStateChange()
-  }, [])
-
-  const toggleKnown = useCallback((id) => {
-    const next = new Set(_pmKnown)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    _pmKnown = next
-    try { localStorage.setItem('tenali_pathmap_known', JSON.stringify([...next])) } catch {}
-    notifyPmStateChange()
-  }, [])
-
-  const resetKnown = useCallback(() => {
-    _pmKnown = new Set()
-    try { localStorage.setItem('tenali_pathmap_known', JSON.stringify([])) } catch {}
-    notifyPmStateChange()
-  }, [])
-
-  const path = useMemo(() => (pmStatus === 'ready' ? pmComputePath(goalIds) : []), [goalIds, pmStatus])
-
-  return { goalIds, known, path, setGoal, clearGoal, toggleKnown, resetKnown, pmStatus }
+  );
 }
 
 // ─── PathMap StatsBar ─────────────────────────────────────────
 function PmStatsBar({ path, known }) {
-  if (!path.length) return null
-  const doneCount = path.filter((id) => known.has(id)).length
-  const remaining = path.length - doneCount
+  if (!path.length) return null;
+  const doneCount = path.filter((id) => known.has(id)).length;
+  const remaining = path.length - doneCount;
   return (
     <div className="pm-stats-bar" style={{
       display: 'grid',
@@ -821,27 +447,27 @@ function PmStatsBar({ path, known }) {
         <div className="pm-stat-label" style={{ fontSize: '0.75rem', color: 'var(--clr-text-soft, #a89e94)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 4 }}>Steps to go</div>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── PathMap GoalPicker ───────────────────────────────────────
 function PmGoalPicker({ goalIds, onSetGoal, onClear }) {
-  const [query, setQuery] = useState('')
-  const wrapRef = useRef(null)
+  const [query, setQuery] = useState('');
+  const wrapRef = useRef(null);
 
   const matches = query.trim().length > 0
     ? pmNodes.filter((n) => n.label.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
-    : []
+    : [];
 
   useEffect(() => {
     function handleOutsideClick(e) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setQuery('')
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setQuery('');
     }
-    document.addEventListener('mousedown', handleOutsideClick)
-    return () => document.removeEventListener('mousedown', handleOutsideClick)
-  }, [])
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
-  const currentGoal = goalIds.length > 0 ? pmNodes.find(n => n.id === goalIds[0]) : null
+  const currentGoal = goalIds.length > 0 ? pmNodes.find(n => n.id === goalIds[0]) : null;
 
   return (
     <div className="pm-goal-card" style={{
@@ -867,9 +493,9 @@ function PmGoalPicker({ goalIds, onSetGoal, onClear }) {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && matches.length > 0) {
-                e.preventDefault()
-                onSetGoal([matches[0].id])
-                setQuery('')
+                e.preventDefault();
+                onSetGoal([matches[0].id]);
+                setQuery('');
               }
             }}
             style={{
@@ -899,8 +525,8 @@ function PmGoalPicker({ goalIds, onSetGoal, onClear }) {
                 key={n.id}
                 className="pm-goal-match-item"
                 data-node-id={n.id}
-                onMouseDown={() => { onSetGoal([n.id]); setQuery('') }}
-                onClick={() => { onSetGoal([n.id]); setQuery('') }}
+                onMouseDown={() => { onSetGoal([n.id]); setQuery(''); }}
+                onClick={() => { onSetGoal([n.id]); setQuery(''); }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -929,27 +555,27 @@ function PmGoalPicker({ goalIds, onSetGoal, onClear }) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // ─── PathMap SnakePath ────────────────────────────────────────
-const PM_GAP_Y = 108
-const PM_AMP   = 150
-const PM_WIDTH = 520
-const PM_PAD_TOP = 50
+const PM_GAP_Y = 108;
+const PM_AMP   = 150;
+const PM_WIDTH = 520;
+const PM_PAD_TOP = 50;
 
 function PmSnakePath({ path, known, goalIds, onToggleNode }) {
-  const centerX = PM_WIDTH / 2
+  const centerX = PM_WIDTH / 2;
 
   const pts = path.map((id, i) => ({
     id,
     x: centerX + PM_AMP * Math.sin(i * 0.9),
     y: PM_PAD_TOP + i * PM_GAP_Y,
-  }))
-  const height = PM_PAD_TOP * 2 + PM_GAP_Y * Math.max(path.length - 1, 0)
-  const currentIdx = path.findIndex((id) => !known.has(id))
+  }));
+  const height = PM_PAD_TOP * 2 + PM_GAP_Y * Math.max(path.length - 1, 0);
+  const currentIdx = path.findIndex((id) => !known.has(id));
 
-  if (!path.length) return null
+  if (!path.length) return null;
 
   return (
     <div style={{ width: '100%', overflowX: 'auto' }}>
@@ -967,13 +593,13 @@ function PmSnakePath({ path, known, goalIds, onToggleNode }) {
         </defs>
 
         {pts.slice(0, -1).map((p, i) => {
-          const next = pts[i + 1]
-          const bothDone = known.has(p.id) && known.has(next.id)
-          const dx = next.x - p.x, dy = next.y - p.y
-          const len = Math.hypot(dx, dy)
-          const ux = dx / len, uy = dy / len
-          const x1 = p.x + ux * 26, y1 = p.y + uy * 26
-          const x2 = next.x - ux * 26, y2 = next.y - uy * 26
+          const next = pts[i + 1];
+          const bothDone = known.has(p.id) && known.has(next.id);
+          const dx = next.x - p.x, dy = next.y - p.y;
+          const len = Math.hypot(dx, dy);
+          const ux = dx / len, uy = dy / len;
+          const x1 = p.x + ux * 26, y1 = p.y + uy * 26;
+          const x2 = next.x - ux * 26, y2 = next.y - uy * 26;
           return (
             <line key={i}
               x1={x1} y1={y1} x2={x2} y2={y2}
@@ -982,17 +608,17 @@ function PmSnakePath({ path, known, goalIds, onToggleNode }) {
               strokeLinecap="round"
               strokeDasharray={bothDone ? undefined : '5 10'}
             />
-          )
+          );
         })}
 
         {pts.map((p, i) => {
-          const node = pmNodeById[p.id]
-          const isGoal = goalIds.includes(p.id)
-          const isDone = known.has(p.id)
-          const isCurrent = i === currentIdx
-          const color = pmCatColor[node.cat] || pmCatColor.other
-          const fill = isDone ? '#5cb87a' : color
-          const labelSide = p.x >= PM_WIDTH / 2 ? 1 : -1
+          const node = pmNodeById[p.id];
+          const isGoal = goalIds.includes(p.id);
+          const isDone = known.has(p.id);
+          const isCurrent = i === currentIdx;
+          const color = pmCatColor[node.cat] || pmCatColor.other;
+          const fill = isDone ? '#5cb87a' : color;
+          const labelSide = p.x >= PM_WIDTH / 2 ? 1 : -1;
           return (
             <g key={p.id}
               transform={`translate(${p.x},${p.y})`}
@@ -1016,24 +642,24 @@ function PmSnakePath({ path, known, goalIds, onToggleNode }) {
                 fill="var(--clr-text, #ede8e3)" textAnchor={labelSide > 0 ? 'start' : 'end'}
                 fontFamily="var(--font-body)">{node.label}</text>
             </g>
-          )
+          );
         })}
       </svg>
     </div>
-  )
+  );
 }
 
 // ─── PathMap ModuleGrid ───────────────────────────────────────
-function PmModuleGrid({ path, known, goalIds, onToggleKnown, onSetGoal }) {
-  const [filter, setFilter] = useState('')
-  const pathIndex = useMemo(() => Object.fromEntries(path.map((id, i) => [id, i + 1])), [path])
-  const sorted = useMemo(() => [...pmNodes].sort((a, b) => a.label.localeCompare(b.label)), [])
+function PmModuleGrid({ path, goalIds, onSetGoal }) {
+  const [filter, setFilter] = useState('');
+  const pathIndex = useMemo(() => Object.fromEntries(path.map((id, i) => [id, i + 1])), [path]);
+  const sorted = useMemo(() => [...pmNodes].sort((a, b) => a.label.localeCompare(b.label)), []);
   const filtered = filter.trim()
     ? sorted.filter((n) => n.label.toLowerCase().includes(filter.trim().toLowerCase()))
-    : sorted
+    : sorted;
 
   function handleCardClick(e, id) {
-    if (e.shiftKey || e.metaKey || e.ctrlKey) onSetGoal([id])
+    if (e.shiftKey || e.metaKey || e.ctrlKey) onSetGoal([id]);
   }
 
   return (
@@ -1046,13 +672,12 @@ function PmModuleGrid({ path, known, goalIds, onToggleKnown, onSetGoal }) {
       <p className="pm-hint">Click any card to mark it known / not known. Shift-click to set as goal.</p>
       <div className="pm-module-grid">
         {filtered.map((n) => {
-          const onPath = pathIndex[n.id] !== undefined
-          const isKnown = known.has(n.id)
-          const isGoal = goalIds.includes(n.id)
-          const dimmed = goalIds.length > 0 && !onPath
-          let badge = null
-          if (isGoal) badge = <span className="pm-card-badge goal">GOAL</span>
-          else if (onPath) badge = <span className="pm-card-badge step">{pathIndex[n.id]}</span>
+          const onPath = pathIndex[n.id] !== undefined;
+          const isGoal = goalIds.includes(n.id);
+          const dimmed = goalIds.length > 0 && !onPath;
+          let badge = null;
+          if (isGoal) badge = <span className="pm-card-badge goal">GOAL</span>;
+          else if (onPath) badge = <span className="pm-card-badge step">{pathIndex[n.id]}</span>;
           return (
             <button key={n.id} className={`pm-card${dimmed ? ' dimmed' : ''}`}
               style={{ '--dot': pmCatColor[n.cat] }} onClick={(e) => handleCardClick(e, n.id)}>
@@ -1060,16 +685,16 @@ function PmModuleGrid({ path, known, goalIds, onToggleKnown, onSetGoal }) {
               <div className="pm-card-label">{n.label}</div>
               <div className="pm-card-sub">{n.sub}</div>
             </button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 // ─── PathMap main component ───────────────────────────────────
 function PathMap({ onBack }) {
-  const { goalIds, known, path, setGoal, clearGoal, toggleKnown, pmStatus } = usePathmapState()
+  const { goalIds, known, path, setGoal, clearGoal, toggleKnown, pmStatus } = usePathmapState();
 
   if (pmStatus === 'loading') {
     return (
@@ -1084,7 +709,7 @@ function PathMap({ onBack }) {
         </div>
         <div className="pm-empty">Loading topics…</div>
       </div>
-    )
+    );
   }
 
   if (pmStatus === 'error') {
@@ -1100,7 +725,7 @@ function PathMap({ onBack }) {
         </div>
         <div className="pm-empty">Couldn't load topic data. Please refresh and try again.</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -1130,32 +755,30 @@ function PathMap({ onBack }) {
           <PmSnakePath path={path} known={known} goalIds={goalIds} onToggleNode={toggleKnown} />
         </div>
       )}
-      <PmModuleGrid path={path} known={known} goalIds={goalIds} onToggleKnown={toggleKnown} onSetGoal={setGoal} />
+      <PmModuleGrid path={path} goalIds={goalIds} onSetGoal={setGoal} />
     </div>
-  )
+  );
 }
-
-// ─── END PATHMAP ─────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════════
 // PmCongratsModal — shown when every node in the path is marked known.
 // Uses only app-native CSS variables so it blends with the rest of the UI.
 // ═══════════════════════════════════════════════════════════════
 function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
-  const goalNode = goalIds.length > 0 ? pmNodeById[goalIds[0]] : null
-  if (!goalNode) return null
+  const goalNode = goalIds.length > 0 ? pmNodeById[goalIds[0]] : null;
+  if (!goalNode) return null;
 
   // Topics that succeed the goal in the graph but are NOT already in the path
-  const pathSet = new Set(path)
+  const pathSet = new Set(path);
   const furtherNodes = (pmSuccessorMap[goalIds[0]] || [])
     .filter((id) => !pathSet.has(id))
     .slice(0, 4)
     .map((id) => pmNodeById[id])
-    .filter(Boolean)
+    .filter(Boolean);
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(0,0,0,0.78)',
@@ -1174,7 +797,6 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
         position: 'relative',
         boxShadow: '0 8px 40px rgba(0,0,0,0.55)',
       }}>
-        {/* close button — same pattern as every other modal in the app */}
         <button
           onClick={onClose}
           style={{
@@ -1186,10 +808,8 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
           }}
         >✕</button>
 
-        {/* Trophy row */}
         <div style={{ fontSize: 38, marginBottom: 16, letterSpacing: 4 }}>🎉 🏆 🎉</div>
 
-        {/* Headline */}
         <div style={{
           fontSize: '1.25rem',
           fontWeight: 800,
@@ -1200,7 +820,6 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
           Path complete!
         </div>
 
-        {/* Goal name — accent colour, same as used elsewhere in the path panel */}
         <div style={{
           fontSize: '1rem',
           fontWeight: 700,
@@ -1221,12 +840,10 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
           You've mastered all {path.length} steps on your path. Brilliant work!
         </p>
 
-        {/* Divider — same border colour as the rest of the UI */}
         <div style={{ borderTop: '1px solid var(--clr-border)', marginBottom: 18 }} />
 
         {furtherNodes.length > 0 ? (
           <>
-            {/* Section label — same micro-label style used in the path panel header */}
             <div style={{
               fontSize: '0.68rem',
               fontWeight: 700,
@@ -1239,7 +856,6 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
               What to study next
             </div>
 
-            {/* Suggestion cards — same card background / border as pm-card */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: furtherNodes.length === 1 ? '1fr' : '1fr 1fr',
@@ -1249,7 +865,7 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
               {furtherNodes.map((n) => (
                 <button
                   key={n.id}
-                  onClick={() => { onSetGoal([n.id]); onClose() }}
+                  onClick={() => { onSetGoal([n.id]); onClose(); }}
                   style={{
                     background: 'var(--clr-card)',
                     border: '1.5px solid var(--clr-border)',
@@ -1261,15 +877,14 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
                     transition: 'border-color 0.15s, background 0.15s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = pmCatColor[n.cat]
-                    e.currentTarget.style.background = 'var(--clr-hover-strong, rgba(255,255,255,0.06))'
+                    e.currentTarget.style.borderColor = pmCatColor[n.cat];
+                    e.currentTarget.style.background = 'var(--clr-hover-strong, rgba(255,255,255,0.06))';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--clr-border)'
-                    e.currentTarget.style.background = 'var(--clr-card)'
+                    e.currentTarget.style.borderColor = 'var(--clr-border)';
+                    e.currentTarget.style.background = 'var(--clr-card)';
                   }}
                 >
-                  {/* category dot — same dot used on pm-cards */}
                   <div style={{
                     width: 7, height: 7,
                     borderRadius: '50%',
@@ -1296,7 +911,6 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
             </div>
           </>
         ) : (
-          /* No successors — just a warm wrap-up line */
           <p style={{
             fontSize: '0.85rem',
             color: 'var(--clr-text-soft)',
@@ -1308,7 +922,6 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
           </p>
         )}
 
-        {/* Action row — ghost + accent, same pattern as modal "Show my path" button */}
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={onClose}
@@ -1347,30 +960,30 @@ function PmCongratsModal({ goalIds, path, onClose, onNewGoal, onSetGoal }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
 // PmHomePath — gamified winding trail shown on the Home screen
 // ═══════════════════════════════════════════════════════════════
-const PMH_WIDTH   = 620
-const PMH_AMP     = 190
-const PMH_GAP_Y   = 152
-const PMH_PAD_TOP = 64
-const PMH_R       = 34
+const PMH_WIDTH   = 620;
+const PMH_AMP     = 190;
+const PMH_GAP_Y   = 152;
+const PMH_PAD_TOP = 64;
+const PMH_R       = 34;
 
 function PmHomePath({ path, known, goalIds, onToggleKnown, onSelect }) {
-  const centerX = PMH_WIDTH / 2
+  const centerX = PMH_WIDTH / 2;
 
   const pts = path.map((id, i) => ({
     id,
     x: centerX + PMH_AMP * Math.sin(i * 0.85),
     y: PMH_PAD_TOP + i * PMH_GAP_Y,
-  }))
-  const height = PMH_PAD_TOP * 2 + PMH_GAP_Y * Math.max(path.length - 1, 0)
-  const currentIdx = path.findIndex((id) => !known.has(id))
+  }));
+  const height = PMH_PAD_TOP * 2 + PMH_GAP_Y * Math.max(path.length - 1, 0);
+  const currentIdx = path.findIndex((id) => !known.has(id));
 
-  if (!path.length) return null
+  if (!path.length) return null;
 
   return (
     <div className="pmh-wrap" style={{ width: '100%', overflowX: 'auto' }}>
@@ -1398,10 +1011,10 @@ function PmHomePath({ path, known, goalIds, onToggleKnown, onSelect }) {
         </defs>
 
         {pts.slice(0, -1).map((p, i) => {
-          const next = pts[i + 1]
-          const bothDone = known.has(p.id) && known.has(next.id)
-          const midY = (p.y + next.y) / 2
-          const d = `M ${p.x} ${p.y} C ${p.x} ${midY}, ${next.x} ${midY}, ${next.x} ${next.y}`
+          const next = pts[i + 1];
+          const bothDone = known.has(p.id) && known.has(next.id);
+          const midY = (p.y + next.y) / 2;
+          const d = `M ${p.x} ${p.y} C ${p.x} ${midY}, ${next.x} ${midY}, ${next.x} ${next.y}`;
           return (
             <path key={i} d={d} fill="none"
               stroke={bothDone ? '#5cb87a' : 'rgba(255,255,255,0.18)'}
@@ -1409,19 +1022,19 @@ function PmHomePath({ path, known, goalIds, onToggleKnown, onSelect }) {
               strokeLinecap="round"
               strokeDasharray={bothDone ? undefined : '2 16'}
             />
-          )
+          );
         })}
 
         {pts.map((p, i) => {
-          const node = pmNodeById[p.id]
-          const isDone = known.has(p.id)
-          const isGoal = goalIds.includes(p.id)
-          const isCurrent = i === currentIdx
-          const isFuture = !isDone && !isCurrent && i > currentIdx
-          const color = pmCatColor[node.cat] || pmCatColor.other
-          const fill = isDone ? '#5cb87a' : color
-          const labelSide = p.x >= centerX ? 1 : -1
-          const nodeOpacity = isFuture ? 0.4 : 1
+          const node = pmNodeById[p.id];
+          const isDone = known.has(p.id);
+          const isGoal = goalIds.includes(p.id);
+          const isCurrent = i === currentIdx;
+          const isFuture = !isDone && !isCurrent && i > currentIdx;
+          const color = pmCatColor[node.cat] || pmCatColor.other;
+          const fill = isDone ? '#5cb87a' : color;
+          const labelSide = p.x >= centerX ? 1 : -1;
+          const nodeOpacity = isFuture ? 0.4 : 1;
 
           return (
             <g key={p.id} transform={`translate(${p.x},${p.y})`}>
@@ -1456,7 +1069,7 @@ function PmHomePath({ path, known, goalIds, onToggleKnown, onSelect }) {
               <g
                 transform={`translate(${PMH_R - 8},${-PMH_R + 8})`}
                 style={{ cursor: 'pointer' }}
-                onClick={(e) => { e.stopPropagation(); onToggleKnown(p.id) }}
+                onClick={(e) => { e.stopPropagation(); onToggleKnown(p.id); }}
               >
                 <circle r={12} fill={isDone ? '#5cb87a' : 'var(--clr-card, #2a2420)'}
                   stroke="rgba(255,255,255,0.35)" strokeWidth={1.5} />
@@ -1489,19 +1102,19 @@ function PmHomePath({ path, known, goalIds, onToggleKnown, onSelect }) {
                 {node.sub}
               </text>
             </g>
-          )
+          );
         })}
       </svg>
     </div>
-  )
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
 // PmHamburgerItem — Level Map / Path entry inside hamburger menu
 // ═══════════════════════════════════════════════════════════════
 function PmHamburgerItem({ onOpen }) {
-  const { goalIds, known, path, pmStatus } = usePathmapState()
-  const stepsLeft = path.filter((id) => !known.has(id)).length
+  const { goalIds, known, path, pmStatus } = usePathmapState();
+  const stepsLeft = path.filter((id) => !known.has(id)).length;
 
   return (
     <button
@@ -1524,24 +1137,24 @@ function PmHamburgerItem({ onOpen }) {
         Learn by prerequisite path
       </span>
     </button>
-  )
+  );
 }
 
 function PmHeaderPill(props) {
-  return <PmHamburgerItem {...props} />
+  return <PmHamburgerItem {...props} />;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // PmGoalModal — "🗺 Learn by Path" popup modal
 // ═══════════════════════════════════════════════════════════════
-function PmGoalModal({ open, onClose, onSelect }) {
-  const { goalIds, known, path, setGoal, clearGoal, toggleKnown, resetKnown, pmStatus } = usePathmapState()
+function PmGoalModal({ open, onClose }) {
+  const { goalIds, known, path, setGoal, clearGoal, toggleKnown, resetKnown, pmStatus } = usePathmapState();
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 200,
         background: 'rgba(0,0,0,0.75)',
@@ -1593,9 +1206,9 @@ function PmGoalModal({ open, onClose, onSelect }) {
             <PmSnakePath path={path} known={known} goalIds={goalIds} onToggleNode={toggleKnown} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
               {path.map((id, i) => {
-                const node = pmNodeById[id]
-                const isDone = known.has(id)
-                const isGoal = goalIds.includes(id)
+                const node = pmNodeById[id];
+                const isDone = known.has(id);
+                const isGoal = goalIds.includes(id);
                 return (
                   <button
                     key={id}
@@ -1619,17 +1232,17 @@ function PmGoalModal({ open, onClose, onSelect }) {
                     {isDone ? '✓ ' : ''}{node?.label || id}
                     {isGoal ? ' ★' : ''}
                   </button>
-                )
+                );
               })}
             </div>
 
             <button
               onClick={() => {
-                onClose()
+                onClose();
                 setTimeout(() => {
-                  const el = document.querySelector('.pmh-panel')
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }, 50)
+                  const el = document.querySelector('.pmh-panel');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
               }}
               style={{
                 width: '100%', padding: '11px',
@@ -1644,7 +1257,7 @@ function PmGoalModal({ open, onClose, onSelect }) {
               <button
                 onClick={() => {
                   if (window.confirm('Reset all progress? This will clear all nodes you marked as known.')) {
-                    resetKnown()
+                    resetKnown();
                   }
                 }}
                 style={{
@@ -1664,21 +1277,21 @@ function PmGoalModal({ open, onClose, onSelect }) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
 // PmHomeSection — winding snake path panel on the home dashboard
 // ═══════════════════════════════════════════════════════════════
 function PmHomeSection({ onSelect, onOpenGoalPicker }) {
-  const { goalIds, known, path, clearGoal, toggleKnown, setGoal, pmStatus } = usePathmapState()
-  const [showCongrats, setShowCongrats] = useState(false)
+  const { goalIds, known, path, clearGoal, toggleKnown, setGoal, pmStatus } = usePathmapState();
+  const [showCongrats, setShowCongrats] = useState(false);
 
-  if (pmStatus !== 'ready' || path.length === 0) return null
+  if (pmStatus !== 'ready' || path.length === 0) return null;
 
-  const stepsLeft = path.filter((id) => !known.has(id)).length
-  const goalNode = goalIds.length > 0 ? pmNodeById[goalIds[0]] : null
-  const allDone = path.length > 0 && path.every((id) => known.has(id))
+  const stepsLeft = path.filter((id) => !known.has(id)).length;
+  const goalNode = goalIds.length > 0 ? pmNodeById[goalIds[0]] : null;
+  const allDone = path.length > 0 && path.every((id) => known.has(id));
 
   return (
     <>
@@ -1793,37 +1406,27 @@ function PmHomeSection({ onSelect, onOpenGoalPicker }) {
           path={path}
           onClose={() => setShowCongrats(false)}
           onNewGoal={() => {
-            setShowCongrats(false)
-            if (onOpenGoalPicker) onOpenGoalPicker()
+            setShowCongrats(false);
+            if (onOpenGoalPicker) onOpenGoalPicker();
           }}
           onSetGoal={(ids) => {
-            setGoal(ids)
-            setShowCongrats(false)
+            setGoal(ids);
+            setShowCongrats(false);
           }}
         />
       )}
     </>
-  )
+  );
 }
 
 export default PathMap;
 export {
-  installPmAnswerInterceptor,
-  pmTrackAnswer,
   PmSuggestIcon,
-  usePmGraphData,
-  pmComputePath,
-  pmNodeById,
-  pmSuccessorMap,
-  pmCatColor,
-  pmStarPoints,
   PmCongratsModal,
   PmHomePath,
   PmGoalPicker,
   PmStatsBar,
   PmSnakePath,
-  usePathmapState,
-  pmGetCurrentSuggestedModule,
   PmQuestBanner,
   PmGoalModal,
   PmHomeSection,

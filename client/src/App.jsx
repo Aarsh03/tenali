@@ -43,11 +43,11 @@ import LinearAlgebraApp from './LinearAlgebraApp'
 import PathMap, {
   PmQuestBanner,
   PmSuggestIcon,
-  pmTrackAnswer,
   PmGoalModal,
   PmHomeSection,
   PmHamburgerItem
 } from './PathMap';
+import { pmTrackAnswer } from './pathMapHelpers';
 import { TILES, FEATURED_TILES, MATH_LAB_ENTRY, GEOCRAFT_ENTRY } from './features/tiles'
 import LandingPage from './components/LandingPage/LandingPage.jsx'
 import LandingNavbar from './components/LandingPage/LandingNavbar.jsx'
