@@ -1,5 +1,5 @@
 /**
- * server/lib/mathHelpers.js
+ * server/lib/mathValueParser.js
  * Centralized, safe mathematical value parsing and answer validation.
  */
 

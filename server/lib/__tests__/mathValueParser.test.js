@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-const { parseMathValue, compareMathValues, textMatches } = require('../mathHelpers');
+const { parseMathValue, compareMathValues, textMatches } = require('../mathValueParser');
 
-describe('mathHelpers - Issue #177 Math Answer Parsing & Validation', () => {
+describe('mathValueParser - Issue #177 Math Answer Parsing & Validation', () => {
   describe('parseMathValue', () => {
     it('TEN-MATH-011: parses simple fractions', () => {
       expect(parseMathValue('2/3')).toBeCloseTo(0.666666, 4);
