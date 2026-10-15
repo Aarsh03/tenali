@@ -23,7 +23,19 @@ export function pmBuildDerivedMaps() {
 
 export function pmFetchGraphData() {
   if (!pmGraphDataPromise) {
-    pmGraphDataPromise = fetch('/graph-data.json')
+    const basePath = import.meta.env.BASE_URL || '/';
+    const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+    const graphDataUrl = `${normalizedBase}graph-data.json`;
+
+    pmGraphDataPromise = fetch(graphDataUrl)
+      .then((res) => {
+        if (!res.ok) {
+          const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+          if (apiBase) return fetch(`${apiBase}/graph-data.json`);
+          throw new Error(`Failed to load graph-data.json (${res.status})`);
+        }
+        return res;
+      })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to load graph-data.json (${res.status})`);
         return res.json();
