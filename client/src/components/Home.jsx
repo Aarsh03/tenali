@@ -6,19 +6,20 @@ import HomeNavMenu from './HomeNavMenu';
 import SectionFilterBar from './SectionFilterBar';
 import { PmQuestBanner, PmGoalModal, PmHomeSection } from '../PathMap';
 import { navigate } from '../lib/router';
+import NetflixSectionRow from './NetflixSectionRow';
 import './Home.css';
 
 const API = import.meta.env.VITE_API_BASE_URL || '';
 
 const HOME_SECTIONS = [
-  { key: 'number-foundations', title: 'Number Foundations' },
-  { key: 'everyday-maths', title: 'Everyday Maths' },
-  { key: 'algebra', title: 'Algebra' },
-  { key: 'calculus', title: 'Calculus' },
-  { key: 'linear-algebra', title: 'Linear Algebra' },
-  { key: 'shape-space', title: 'Shape & Space' },
-  { key: 'data-chance', title: 'Data & Chance' },
-  { key: 'shelf', title: 'Puzzles & Play' },
+  { key: 'number-foundations', title: 'Number Foundations', icon: '🔢' },
+  { key: 'everyday-maths', title: 'Everyday Maths', icon: '🛒' },
+  { key: 'algebra', title: 'Algebra', icon: '📐' },
+  { key: 'calculus', title: 'Calculus', icon: '📈' },
+  { key: 'linear-algebra', title: 'Linear Algebra', icon: '🧊' },
+  { key: 'shape-space', title: 'Shape & Space', icon: '⭕' },
+  { key: 'data-chance', title: 'Data & Chance', icon: '🎲' },
+  { key: 'shelf', title: 'Puzzles & Play', icon: '🧩' },
 ];
 
 const isStage3Completed = (topicKey, completedTopics) => {
@@ -227,42 +228,26 @@ export default function Home({
         counts={counts}
       />
 
-      {/* Categorized Sections (#201, #202, #203) */}
+      {/* Netflix-Style Categorized Sections (#201, #202, #203) */}
       <div id="tour-home-grid">
-        {visibleSections.map(({ key, title }) => {
-          const sectionApps = filteredRegular.filter((app) => (app.category || 'shelf') === key);
+        {visibleSections.map((section) => {
+          const sectionApps = filteredRegular.filter(
+            (app) => (app.category || 'shelf') === section.key
+          );
           if (sectionApps.length === 0) return null;
 
           return (
-            <section key={key} className="home-section">
-              <h2 className="home-section-title">{title}</h2>
-              <div className="menu-grid">
-                {sectionApps.map((app) => {
-                  const isGold = goldMastery && goldMastery.includes(app.key);
-                  const isCompleted = isStage3Completed(app.key, completedTopics);
-                  return (
-                    <button
-                      key={app.key}
-                      className={`menu-card ${isGold ? 'gold-card' : app.color}`}
-                      onClick={() => {
-                        if (app.isRedirect) {
-                          navigate(app.path);
-                        } else {
-                          onSelect(app.key);
-                        }
-                      }}
-                    >
-                      <span className="menu-title">
-                        {app.name}
-                        {isGold && <span className="badge-indicator">🥇</span>}
-                        {!isGold && isCompleted && <span className="badge-indicator">✅</span>}
-                      </span>
-                      <span className="menu-subtitle">{app.subtitle}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
+            <NetflixSectionRow
+              key={section.key}
+              section={section}
+              tiles={sectionApps}
+              completedTopics={completedTopics}
+              goldMastery={goldMastery}
+              onSelect={onSelect}
+              isStage3Completed={isStage3Completed}
+              navigate={navigate}
+              isSearchMode={isSearching}
+            />
           );
         })}
 
