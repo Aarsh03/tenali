@@ -39,6 +39,7 @@ import CrossSectionApp from './CrossSectionApp';
 window.React = React;
 console.log("React version:", React.version);
 import Home from './components/Home';
+import LinearAlgebraApp from './LinearAlgebraApp';
 import PathMap, { PmSuggestIcon } from './PathMap';
 import { pmTrackAnswer } from './pathMapHelpers';
 import LandingPage from './components/LandingPage/LandingPage.jsx'

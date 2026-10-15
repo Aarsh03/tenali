@@ -3,9 +3,6 @@
     "no-empty": {
       "count": 152
     },
-    "no-restricted-syntax": {
-      "count": 1
-    },
     "no-undef": {
       "count": 40
     },
@@ -13,7 +10,7 @@
       "count": 5
     },
     "no-unused-vars": {
-      "count": 213
+      "count": 211
     },
     "no-useless-escape": {
       "count": 4
