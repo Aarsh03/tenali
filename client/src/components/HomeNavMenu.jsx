@@ -190,15 +190,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
             />
           ))}
 
-          {featuredApps.map((app) => (
-            <DropdownItem
-              key={app.key}
-              onClick={() => handleSelect(app.key)}
-              title={app.name}
-              subtitle={app.subtitle}
-            />
-          ))}
-
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
           <DropdownItem
