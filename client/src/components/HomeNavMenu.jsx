@@ -109,21 +109,7 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
       </button>
 
       {menuOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            zIndex: 50,
-            background: 'var(--clr-card)',
-            border: '1.5px solid var(--clr-border)',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: 'var(--shadow-card)',
-            padding: '6px 0',
-            minWidth: '200px',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="home-nav-dropdown">
           <DropdownItem
             onClick={() => {
               setMenuOpen(false);
@@ -182,15 +168,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
           />
 
           {filteredHamburgerApps.map((app) => (
-            <DropdownItem
-              key={app.key}
-              onClick={() => handleSelect(app.key)}
-              title={app.name}
-              subtitle={app.subtitle}
-            />
-          ))}
-
-          {featuredApps.map((app) => (
             <DropdownItem
               key={app.key}
               onClick={() => handleSelect(app.key)}

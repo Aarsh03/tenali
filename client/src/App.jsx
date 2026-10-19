@@ -37,20 +37,30 @@ import NetBuilderApp from './NetBuilderApp';
 import CrossSectionApp from './CrossSectionApp';
 
 window.React = React;
-console.log("React version:", React.version);
 import Home from './components/Home';
 import LinearAlgebraApp from './LinearAlgebraApp';
 import PathMap, { PmSuggestIcon } from './PathMap';
 import { pmTrackAnswer } from './pathMapHelpers';
-import LandingPage from './components/LandingPage/LandingPage.jsx'
-import LandingNavbar from './components/LandingPage/LandingNavbar.jsx'
+import LandingPage from './components/LandingPage/LandingPage.jsx';
+import LandingNavbar from './components/LandingPage/LandingNavbar.jsx';
+import {
+  isStage3Completed,
+  getTopicBadgeLevel,
+  saveLocalProgress,
+  loadLocalProgress,
+  addCompletedTopic,
+  reconcileProgress,
+} from './features/progress';
+import { useQuizCompletion } from './hooks/useQuizCompletion';
+
+export { getTopicBadgeLevel };
 
 
 /**
  * useProgressSubmit Hook
  * Submits the result of a quiz question to the backend to track mastery and ensure unique questions.
  */
-function useProgressSubmit(revealed, isCorrect, topic, questionId) {
+export function useProgressSubmit(revealed, isCorrect, topic, questionId) {
   useEffect(() => {
     if (!revealed) return;
     try { pmTrackAnswer(topic, 'medium', isCorrect); } catch {}
@@ -103,6 +113,7 @@ import VisualMathLabRedux, {
 import CoordinateGrid from './components/CoordinateGrid';
 import LanguageDashboard from './language/LanguageDashboard'
 import ContrastChallengeApp, { QuizLayoutExtension } from './ContrastChallengeApp'
+import CoordGeomInteractiveApp from './apps/CoordGeomInteractiveApp.jsx'
 import { VOCAB_CORPUS } from './vocabCorpus'
 import PercentExplanationApp from './PercentExplanationApp'
 import { playSound } from './audioContext'
@@ -1106,7 +1117,7 @@ const enhanceFinishedScreen = (node, sessionGoal) => {
  * structured card with highlighted answer and formatted explanation.
  * For normal correct/wrong feedback, renders inline text.
  */
-function renderFeedback(feedback, isCorrect) {
+export function renderFeedback(feedback, isCorrect) {
   if (!feedback) return null
   const isSolve = isCorrect === false && feedback.startsWith('Solution:')
   if (!isSolve) {
@@ -41286,13 +41297,6 @@ function TenthApp({ onBack }) {
 }
 
 
-const isStage3Completed = (topicKey, completedTopics) => {
-  if (!completedTopics || !Array.isArray(completedTopics)) return false;
-  if (completedTopics.includes(topicKey)) return true;
-  return completedTopics.includes(`${topicKey}-easy`) &&
-    completedTopics.includes(`${topicKey}-medium`) &&
-    completedTopics.includes(`${topicKey}-hard`);
-};
 
 const getTopicBadgeType = (topicKey, completedTopicsList) => {
   if (!completedTopicsList || !Array.isArray(completedTopicsList)) return 'topic_blue';
@@ -41629,261 +41633,6 @@ function DragDropCountingApp({ onBack }) {
       </div>
     </QuizLayout>
   )
-}
-
-function CoordGeomInteractiveApp({ onBack }) {
-  const [started, setStarted] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const [round, setRound] = useState(0);
-  const [numQuestions, setNumQuestions] = useState('10');
-  const [difficulty, setDifficulty] = useState('easy');
-  const [score, setScore] = useState(0);
-
-  const [currentQ, setCurrentQ] = useState(null);
-  const [dartPos, setDartPos] = useState(null); // {x, y}
-  const [textAnswer, setTextAnswer] = useState(''); // for distance, gradient, etc.
-  const [revealed, setRevealed] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [feedback, setFeedback] = useState('');
-  const [results, setResults] = useState([]);
-
-  useProgressSubmit(revealed, isCorrect, 'coordgeom', currentQ?.id);
-  const timer = useTimer();
-
-  const loadQuestion = async () => {
-    try {
-      const r = await fetch(`${API}/coordgeom-api/question?difficulty=${difficulty}`);
-      if (!r.ok) throw new Error('Server error');
-      const data = await r.json();
-      setCurrentQ(data);
-      setDartPos(null);
-      setTextAnswer('');
-      setRevealed(false);
-      setIsCorrect(null);
-      setFeedback('');
-      timer.start();
-    } catch (e) {
-      console.error(e);
-      setFeedback('Error loading question. ' + e.message);
-    }
-  };
-
-  const startGame = () => {
-    const qCount = parseInt(numQuestions) || 10;
-    setNumQuestions(String(qCount));
-    setStarted(true);
-    setFinished(false);
-    setRound(1);
-    setScore(0);
-    setResults([]);
-    loadQuestion();
-  };
-
-  // CoordinateGrid handles clicks internally
-
-  const handleCheck = async () => {
-    if (revealed) return;
-    if (currentQ?.type === 'coord' && !dartPos) return;
-    if (currentQ?.type !== 'coord' && !textAnswer.trim()) return;
-
-    const timeTaken = timer.stop();
-    setRevealed(true);
-
-    try {
-      const payload = {
-        ...currentQ,
-        userAnswer: currentQ.type === 'coord' ? `(${dartPos.x}, ${dartPos.y})` : textAnswer
-      };
-      const r = await fetch(`${API}/coordgeom-api/check`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await r.json();
-
-      const correct = data.correct;
-      setIsCorrect(correct);
-      setFeedback(data.message + (correct ? ` ${data.display} is correct!` : ` The answer was ${data.display}.`));
-      if (correct) setScore(s => s + 1);
-
-      setResults(prev => [...prev, {
-        question: currentQ.prompt,
-        userAnswer: payload.userAnswer,
-        correctAnswer: data.display,
-        correct,
-        time: timeTaken
-      }]);
-    } catch (e) {
-      console.error(e);
-      setFeedback('Error checking answer.');
-    }
-  };
-
-  const handleSolve = () => {
-    if (revealed || !currentQ) return;
-    timer.stop();
-    setRevealed(true);
-    setIsCorrect(false);
-    setFeedback(`Solution: The answer is ${currentQ.display}.`);
-    setResults(prev => [...prev, {
-      question: currentQ.prompt,
-      userAnswer: '—',
-      correctAnswer: currentQ.display,
-      correct: false,
-      time: 0
-    }]);
-  };
-
-  const nextQuestion = () => {
-    if (round >= Number(numQuestions)) {
-      setFinished(true);
-    } else {
-      setRound(r => r + 1);
-      loadQuestion();
-    }
-  };
-
-  if (!started) {
-    const diffLabels = { easy: 'Easy — Foundations', medium: 'Medium — Lengths', hard: 'Hard — Slopes & Eqs', extrahard: 'Extra Hard — Advanced' };
-    return (
-      <div style={{ minHeight: '100vh', background: '#181512', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
-        <div style={{
-          background: '#2D2520', border: '1.5px solid #4A4038', borderRadius: '28px',
-          boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%',
-          textAlign: 'center', position: 'relative'
-        }}>
-          <button onClick={onBack} style={{
-            position: 'absolute', top: '24px', left: '24px', background: 'transparent',
-            border: '1px solid #5B5048', borderRadius: '6px', padding: '6px 14px',
-            color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-          }}>← Home</button>
-
-          <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: '#F4F1ED', margin: '0 0 12px', lineHeight: 1.1 }}>
-            Coordinate Geometry
-          </h1>
-          <p style={{ color: '#988D84', fontSize: '0.9rem', margin: '0 0 40px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>
-            Choose a level and solve coordinate geometry challenges
-          </p>
-          <p style={{ color: '#988D84', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>
-            Practice coordinate geometry!
-          </p>
-
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ color: '#F4F1ED', fontSize: '0.9rem', margin: '0 0 16px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
-              Select Difficulty:
-            </h3>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-              {['easy', 'medium', 'hard', 'extrahard'].map(d => (
-                <button key={d} onClick={() => setDifficulty(d)} style={{
-                  background: difficulty === d ? '#F08C46' : 'transparent',
-                  border: difficulty === d ? '1px solid #F08C46' : '1px solid #5B5048',
-                  borderRadius: '50px', padding: '8px 16px',
-                  color: difficulty === d ? '#FFF' : '#988D84', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-                }}>
-                  {diffLabels[d]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <label style={{ color: '#988D84', fontSize: '0.85rem', margin: '0 0 12px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>
-              How many questions?
-            </label>
-            <input type="text" value={numQuestions} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) setNumQuestions(v) }} style={{
-              background: '#463B34', border: '1px solid #5B5048', borderRadius: '6px',
-              padding: '10px', color: '#FFF', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem',
-              width: '100px', textAlign: 'center', outline: 'none'
-            }} placeholder="10" />
-          </div>
-
-          <button onClick={startGame} style={{
-            background: '#F08C46', border: 'none', borderRadius: '6px',
-            padding: '10px 24px', color: '#FFF', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer'
-          }}>
-            Start Quiz
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (finished) {
-    return (
-      <QuizLayout title="Coordinate Geometry" onBack={onBack}>
-        <ResultsView score={score} total={Number(numQuestions)} results={results} onRetry={startGame} />
-      </QuizLayout>
-    );
-  }
-
-  return (
-    <QuizLayout title="Coordinate Geometry" onBack={onBack}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, padding: '0 4px' }}>
-          <span style={{ color: 'var(--clr-muted)', fontSize: '0.85rem' }}>Round {round} / {numQuestions}</span>
-          <span style={{ fontWeight: 700, color: 'var(--clr-accent)' }}>Score: {score}</span>
-        </div>
-
-        <h3 className="prompt-text">{currentQ?.prompt}</h3>
-
-        <div style={{ margin: '20px auto', display: 'flex', justifyContent: 'center' }}>
-          <CoordinateGrid
-            points={currentQ?.points || []}
-            onClick={currentQ?.type === 'coord' && !revealed ? (pos) => setDartPos(pos) : undefined}
-            cursorType={currentQ?.type === 'coord' ? 'crosshair' : 'default'}
-            userTarget={dartPos}
-            revealedTarget={revealed && !isCorrect && currentQ?.type === 'coord' ? { x: currentQ.ansX, y: currentQ.ansY } : null}
-            connectPoints={true}
-            width={350}
-            height={350}
-          />
-        </div>
-
-        {currentQ?.type === 'coord' ? (
-          dartPos && !revealed && (
-            <p style={{ color: 'var(--clr-muted)', fontSize: '0.85rem', margin: '8px 0 0' }}>
-              Selected Point: ({dartPos.x}, {dartPos.y})
-            </p>
-          )
-        ) : (
-          <div style={{ marginTop: 20 }}>
-            <input
-              type="text"
-              className="answer-input"
-              placeholder={currentQ?.type === 'equation' ? 'e.g. y=-3/4x+2' : currentQ?.type === 'fraction' ? 'e.g. -3/4' : 'e.g. 13'}
-              value={textAnswer}
-              onChange={e => !revealed && setTextAnswer(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleCheck(); }}
-              disabled={revealed}
-            />
-          </div>
-        )}
-
-        <div className="button-row" style={{ marginTop: 20, justifyContent: 'center', gap: '10px' }}>
-          {!revealed ? (
-            <>
-              <button className="btn" onClick={handleCheck} disabled={currentQ?.type === 'coord' ? !dartPos : !textAnswer.trim()}>
-                Check Answer
-              </button>
-              <button className="btn" onClick={handleSolve} style={{ background: 'transparent', border: '1px solid var(--clr-border)', color: 'var(--clr-muted)' }}>
-                💡 Solve
-              </button>
-            </>
-          ) : (
-            <button className="btn" onClick={nextQuestion}>
-              Next Question
-            </button>
-          )}
-        </div>
-
-        {revealed && (
-          <div style={{ marginTop: 20 }}>
-            {renderFeedback(feedback, isCorrect)}
-          </div>
-        )}
-      </div>
-    </QuizLayout>
-  );
 }
 
 function DartBoardApp({ onBack }) {
@@ -42565,7 +42314,7 @@ function App() {
       const currentParamView = params.get('view');
       if (mode) {
         if (currentMode !== mode) {
-          window.history.replaceState({}, '', `${BASE}/?mode=${mode}`);
+          window.history.pushState({ mode }, '', `${BASE}/?mode=${mode}`);
         }
       } else {
         if (currentView === 'puzzles') {
@@ -42582,6 +42331,30 @@ function App() {
       console.error('Failed to sync URL mode:', e);
     }
   }, [mode, currentView]);
+
+  // Listen for browser Back/Forward navigation (popstate) to restore mode and view
+  useEffect(() => {
+    const handlePopState = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlMode = params.get('mode') || null;
+        const urlView = params.get('view') || (urlMode ? 'puzzles' : 'landing');
+        setMode(urlMode);
+        setCurrentView(urlView === 'puzzles' ? 'puzzles' : 'landing');
+        if (urlMode === 'angles') {
+          setLearningPhase('select');
+        } else {
+          setLearningPhase(null);
+        }
+        setIsGoalMode(urlMode === 'goalpractice');
+      } catch (e) {
+        console.error('Failed to handle popstate:', e);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const { user } = useAuth()
   const [completedTopics, setCompletedTopics] = useState(() => {
@@ -42639,16 +42412,12 @@ function App() {
         if (r.ok) {
           const data = await r.json()
           if (data) {
-            setCompletedTopics(data.completedTopics || [])
-            setGoldMastery(data.goldMastery || [])
-            setCoins(data.coins || 0)
-            setTotalSolved(data.totalSolved || 0)
-            setStreak(data.streak || 0)
-            localStorage.setItem('tenali-completed-topics', JSON.stringify(data.completedTopics || []))
-            localStorage.setItem('tenali-gold-mastery', JSON.stringify(data.goldMastery || []))
-            localStorage.setItem('tenali-coins', String(data.coins || 0))
-            localStorage.setItem('tenali-total-solved', String(data.totalSolved || 0))
-            localStorage.setItem('tenali-streak', String(data.streak || 0))
+            const merged = reconcileProgress(data);
+            setCompletedTopics(merged.completedTopics);
+            setGoldMastery(merged.goldMastery);
+            setCoins(merged.coins);
+            setTotalSolved(merged.totalSolved);
+            setStreak(merged.streak);
 
             if (data.newlyCompleted && data.newlyCompleted.length > 0) {
               const serverEnqueues = [];
@@ -42712,22 +42481,18 @@ function App() {
   }, []);
 
   const syncProgressToServer = (newCompleted, newGold, newCoins, newSolved, newStreak) => {
-    let localCompleted = [];
-    try { localCompleted = JSON.parse(localStorage.getItem('tenali-completed-topics') || '[]') } catch { }
-    let localGold = [];
-    try { localGold = JSON.parse(localStorage.getItem('tenali-gold-mastery') || '[]') } catch { }
-    let localCoins = 0;
-    try { localCoins = parseInt(localStorage.getItem('tenali-coins') || '0', 10) } catch { }
-    let localSolved = 0;
-    try { localSolved = parseInt(localStorage.getItem('tenali-total-solved') || '0', 10) } catch { }
-    let localStreak = 0;
-    try { localStreak = parseInt(localStorage.getItem('tenali-streak') || '0', 10) } catch { }
-
-    const finalCompleted = newCompleted || localCompleted;
-    const finalGold = newGold || localGold;
-    const finalCoins = newCoins !== undefined ? newCoins : localCoins;
-    const finalSolved = newSolved !== undefined ? newSolved : localSolved;
-    const finalStreak = newStreak !== undefined ? newStreak : localStreak;
+    const merged = reconcileProgress({
+      completedTopics: newCompleted,
+      goldMastery: newGold,
+      coins: newCoins,
+      totalSolved: newSolved,
+      streak: newStreak,
+    });
+    const finalCompleted = merged.completedTopics;
+    const finalGold = merged.goldMastery;
+    const finalCoins = merged.coins;
+    const finalSolved = merged.totalSolved;
+    const finalStreak = merged.streak;
 
     // Check for new unlocks locally
     const enqueues = [];
@@ -42878,13 +42643,7 @@ function App() {
   };
 
   const markTopicCompleted = (topicKey, difficulty = '') => {
-    const targetKey = difficulty ? `${topicKey}-${difficulty}` : topicKey;
-    if (completedTopics.includes(targetKey)) return;
-    let next = [...completedTopics, targetKey];
-    const startedKey = `${topicKey}-started`;
-    if (!next.includes(startedKey)) {
-      next.push(startedKey);
-    }
+    const next = addCompletedTopic(topicKey, difficulty);
     setCompletedTopics(next);
     syncProgressToServer(next, goldMastery, coins);
   };
@@ -42893,12 +42652,14 @@ function App() {
     if (goldMastery.includes(topicKey)) return;
     const next = [...goldMastery, topicKey];
     setGoldMastery(next);
+    saveLocalProgress({ goldMastery: next });
     syncProgressToServer(completedTopics, next, coins);
   };
 
   const updateCoins = (amount) => {
     const next = Math.max(0, coins + amount);
     setCoins(next);
+    saveLocalProgress({ coins: next });
     syncProgressToServer(completedTopics, goldMastery, next);
   };
 
@@ -42908,12 +42669,14 @@ function App() {
         const next = prev + amount;
         localStorage.setItem('tenali-total-solved', String(next));
 
-        let nextCompleted = completedTopics;
+        const local = loadLocalProgress();
+        let nextCompleted = local.completedTopics;
         if (amount > 0 && mode && mode !== 'gk' && mode !== 'vocab' && mode !== 'randommix' && mode !== 'custom' && mode !== 'gym') {
           const startedKey = `${mode}-started`;
-          if (!completedTopics.includes(startedKey)) {
-            nextCompleted = [...completedTopics, startedKey];
+          if (!nextCompleted.includes(startedKey)) {
+            nextCompleted = [...nextCompleted, startedKey];
             setCompletedTopics(nextCompleted);
+            saveLocalProgress({ completedTopics: nextCompleted });
           }
         }
 
@@ -42924,7 +42687,7 @@ function App() {
     return () => {
       delete window.tenaliIncrementSolved;
     };
-  }, [completedTopics, goldMastery, coins, totalSolved, mode]);
+  }, [goldMastery, coins, totalSolved, mode]);
 
 
   // Sync current mode to window global for QuizLayoutExtension
@@ -44664,7 +44427,14 @@ function App() {
                   {/* Image Types */}
                   {(question.type === 'image-numpad' || question.type === 'image-option') && question.image && (
                     <div style={{ textAlign: 'center', margin: '0 auto 16px' }}>
-                      <img src={question.image} alt="Riddle" style={{ maxWidth: '100%', maxHeight: 280, width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: 'var(--radius)', border: '1px solid var(--clr-border)', background: 'var(--clr-input)' }} />
+                      <img
+                        src={withBase(question.image.startsWith('/') ? question.image : `/${question.image}`)}
+                        alt={question.title || 'Visual Riddle'}
+                        onError={(e) => {
+                          console.warn(`[Math Riddles] Failed to load riddle image: ${e.target.src}`);
+                        }}
+                        style={{ maxWidth: '100%', maxHeight: 280, width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: 'var(--radius)', border: '1px solid var(--clr-border)', background: 'var(--clr-input)' }}
+                      />
                     </div>
                   )}
 
@@ -44709,7 +44479,11 @@ function App() {
                           }}
                         >
                           {question.optionImages && question.optionImages[i] ? (
-                            <img src={question.optionImages[i]} alt={opt} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
+                            <img
+                              src={withBase(question.optionImages[i].startsWith('/') ? question.optionImages[i] : `/${question.optionImages[i]}`)}
+                              alt={opt}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }}
+                            />
                           ) : opt}
                         </button>
                       ))}
@@ -44989,6 +44763,8 @@ function App() {
       return (
         <Home
           isGoalSelection={true}
+          completedTopics={completedTopics}
+          goldMastery={goldMastery}
           onBack={() => {
             setMode(null);
             setIsGoalMode(false);
@@ -45043,10 +44819,8 @@ function App() {
 
     return (
       <Home
-        onBackToLanding={() => {
-          setCurrentView('landing');
-          try { window.history.replaceState({}, '', `${BASE}/`); } catch (e) {}
-        }}
+        completedTopics={completedTopics}
+        goldMastery={goldMastery}
         onSelect={(key) => {
           setCurrentView('puzzles');
           if (key === 'goalpractice') {
@@ -45681,23 +45455,7 @@ function App() {
       />}
       <ReflectionJournal />
     </div>
-  )
-}
-export function getTopicBadgeLevel(topicKey, completedTopics = []) {
-  if (!completedTopics || !Array.isArray(completedTopics)) return 'locked';
-  if (completedTopics.includes(`${topicKey}-hard`) || completedTopics.includes(`${topicKey}-gold`)) {
-    return 'gold';
-  }
-  if (completedTopics.includes(`${topicKey}-medium`)) {
-    return 'silver';
-  }
-  if (completedTopics.includes(`${topicKey}-easy`)) {
-    return 'bronze';
-  }
-  if (completedTopics.includes(`${topicKey}-started`)) {
-    return 'blue';
-  }
-  return 'locked';
+  );
 }
 
 function BadgeIcon({ type, size = 64, locked = false, level = '' }) {
@@ -50436,14 +50194,15 @@ function AdditionApp({ onBack, completedTopics = [], goldMastery = [], markTopic
   const questionAbortRef = useRef(null)
   useEffect(() => () => questionAbortRef.current?.abort(), [])
 
-  useEffect(() => {
-    if (finished) {
-      const pass = score / totalQ >= 0.8
-      if (pass && markTopicCompleted) {
-        markTopicCompleted('addition', isAdaptive ? 'adaptive' : difficulty)
-      }
-    }
-  }, [finished, score, totalQ, markTopicCompleted])
+  useQuizCompletion({
+    topicKey: 'addition',
+    difficulty,
+    isAdaptive,
+    score,
+    totalQ,
+    finished,
+    markTopicCompleted,
+  })
 
   // Drag & Drop Visual Counting state
   const [sourceItems, setSourceItems] = useState([])
@@ -52051,14 +51810,15 @@ function BasicArithApp({ onBack, completedTopics = [], goldMastery = [], markTop
   const questionAbortRef = useRef(null)
   useEffect(() => () => questionAbortRef.current?.abort(), [])
 
-  useEffect(() => {
-    if (finished) {
-      const pass = score / totalQ >= 0.8
-      if (pass && markTopicCompleted) {
-        markTopicCompleted('basicarith', isAdaptive ? 'adaptive' : difficulty)
-      }
-    }
-  }, [finished, score, totalQ, markTopicCompleted, isAdaptive, difficulty])
+  useQuizCompletion({
+    topicKey: 'basicarith',
+    difficulty,
+    isAdaptive,
+    score,
+    totalQ,
+    finished,
+    markTopicCompleted,
+  })
 
   const effectiveDiff = () => (isAdaptive) ? adaptiveLevel(adaptScoreRef.current) : difficulty
 
@@ -55162,14 +54922,15 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
     const questionAbortRef = useRef(null)
     useEffect(() => () => questionAbortRef.current?.abort(), [])
 
-    useEffect(() => {
-      if (finished) {
-        const pass = score / totalQ >= 0.8
-        if (pass && markTopicCompleted) {
-          markTopicCompleted(topicKey, isAdaptive ? 'adaptive' : difficulty)
-        }
-      }
-    }, [finished])
+    useQuizCompletion({
+      topicKey,
+      difficulty,
+      isAdaptive,
+      score,
+      totalQ,
+      finished,
+      markTopicCompleted,
+    })
 
     const effectiveDifficulty = () => isAdaptive ? adaptiveLevel(adaptScoreRef.current) : difficulty
 
@@ -59284,14 +59045,15 @@ function RatioApp({ onBack, completedTopics = [], goldMastery = [], markTopicCom
   const [started, setStarted] = useState(false)
   const [finished, setFinished] = useState(false)
 
-  useEffect(() => {
-    if (finished) {
-      const pass = score / totalQ >= 0.8
-      if (pass && markTopicCompleted) {
-        markTopicCompleted('ratio', isAdaptive ? 'adaptive' : difficulty)
-      }
-    }
-  }, [finished])
+  useQuizCompletion({
+    topicKey: 'ratio',
+    difficulty,
+    isAdaptive,
+    score,
+    totalQ,
+    finished,
+    markTopicCompleted,
+  })
 
   const [question, setQuestion] = useState(null)
   const [answer, setAnswer] = useState('')
@@ -61188,14 +60950,15 @@ function FractionAddApp({ onBack, completedTopics = [], goldMastery = [], markTo
   const [started, setStarted] = useState(false)
   const [finished, setFinished] = useState(false)
 
-  useEffect(() => {
-    if (finished) {
-      const pass = score / totalQ >= 0.8
-      if (pass && markTopicCompleted) {
-        markTopicCompleted('fractionadd', isAdaptive ? 'adaptive' : difficulty)
-      }
-    }
-  }, [finished])
+  useQuizCompletion({
+    topicKey: 'fractionadd',
+    difficulty,
+    isAdaptive,
+    score,
+    totalQ,
+    finished,
+    markTopicCompleted,
+  })
   // Current question object from API
   const [question, setQuestion] = useState(null)
   // User's answer as a string: "3/4" or "2 3/4" for mixed numbers

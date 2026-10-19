@@ -1,7 +1,7 @@
 {
   "src/App.jsx": {
     "no-empty": {
-      "count": 152
+      "count": 146
     },
     "no-undef": {
       "count": 40
@@ -10,7 +10,7 @@
       "count": 5
     },
     "no-unused-vars": {
-      "count": 211
+      "count": 210
     },
     "no-useless-escape": {
       "count": 4
@@ -25,25 +25,19 @@
       "count": 64
     },
     "react-hooks/refs": {
-      "count": 80
+      "count": 78
     },
     "react-hooks/rules-of-hooks": {
       "count": 6
     },
     "react-hooks/set-state-in-effect": {
-      "count": 93
+      "count": 89
     },
     "react-refresh/only-export-components": {
-      "count": 6
+      "count": 8
     }
   },
   "src/BattleApp.jsx": {
-    "react-hooks/immutability": {
-      "count": 1
-    },
-    "react-hooks/preserve-manual-memoization": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -62,17 +56,6 @@
     }
   },
   "src/Curiosity.jsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "src/EquationCraftingLab.jsx": {
-    "no-useless-escape": {
-      "count": 7
-    },
-    "react-hooks/purity": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -233,14 +216,6 @@
       "count": 1
     }
   },
-  "src/vachana/exercises/EquationToStory.jsx": {
-    "react-hooks/immutability": {
-      "count": 2
-    },
-    "react-hooks/purity": {
-      "count": 2
-    }
-  },
   "src/vachana/exercises/NoiseFilter.jsx": {
     "react-hooks/set-state-in-effect": {
       "count": 2
@@ -249,11 +224,6 @@
   "src/vachana/exercises/NotationLiteracy.jsx": {
     "react-hooks/purity": {
       "count": 1
-    }
-  },
-  "src/vachana/exercises/SchemaClassifier.jsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 2
     }
   },
   "src/vachana/exercises/SyntacticRewriter.jsx": {

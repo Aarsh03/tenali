@@ -1,43 +1,84 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { TILES } from '../features/tiles';
 import DailyWarmupCard from './DailyWarmupCard';
 import AboutModal from './AboutModal';
 import HomeNavMenu from './HomeNavMenu';
-import SectionFilterBar from './SectionFilterBar';
+import SearchBar from './SearchBar';
+import CategoryCardsGrid from './CategoryCardsGrid';
+import SectionDrilldownView from './SectionDrilldownView';
+import GlobalSearchResults from './GlobalSearchResults';
+import MenuCard from './MenuCard';
 import { PmQuestBanner, PmGoalModal, PmHomeSection } from '../PathMap';
-import { navigate } from '../lib/router';
+import { isStage3Completed } from '../features/progress';
 import './Home.css';
 
 const API = import.meta.env.VITE_API_BASE_URL || '';
 
 const HOME_SECTIONS = [
-  { key: 'number-foundations', title: 'Number Foundations' },
-  { key: 'everyday-maths', title: 'Everyday Maths' },
-  { key: 'algebra', title: 'Algebra' },
-  { key: 'calculus', title: 'Calculus' },
-  { key: 'linear-algebra', title: 'Linear Algebra' },
-  { key: 'shape-space', title: 'Shape & Space' },
-  { key: 'data-chance', title: 'Data & Chance' },
-  { key: 'shelf', title: 'Puzzles & Play' },
+  {
+    key: 'number-foundations',
+    title: 'Number Foundations',
+    icon: '🔢',
+    subtitle: 'Arithmetic, Fractions, Decimals, Factors & Place Value',
+    color: 'blue',
+  },
+  {
+    key: 'everyday-maths',
+    title: 'Everyday Maths',
+    icon: '🛒',
+    subtitle: 'Percentages, Banking, GST, Profit & Loss',
+    color: 'green',
+  },
+  {
+    key: 'algebra',
+    title: 'Algebra',
+    icon: '📐',
+    subtitle: 'Linear Equations, Functions, Indices & Polynomials',
+    color: 'purple',
+  },
+  {
+    key: 'calculus',
+    title: 'Calculus',
+    icon: '📈',
+    subtitle: 'Differentiation, Integration, Limits & Diff Equations',
+    color: 'orange',
+  },
+  {
+    key: 'linear-algebra',
+    title: 'Linear Algebra',
+    icon: '🧊',
+    subtitle: 'Vectors, Matrices, Dot Products & Transformations',
+    color: 'blue',
+  },
+  {
+    key: 'shape-space',
+    title: 'Shape & Space',
+    icon: '⭕',
+    subtitle: 'Angles, Triangles, GeoCraft, Circles & Symmetry',
+    color: 'purple',
+  },
+  {
+    key: 'data-chance',
+    title: 'Data & Chance',
+    icon: '🎲',
+    subtitle: 'Probability, Statistics & Combinatorics',
+    color: 'green',
+  },
+  {
+    key: 'shelf',
+    title: 'Puzzles & Play',
+    icon: '🧩',
+    subtitle: 'Detective Agency, Sudoku, GK & Word Riddles',
+    color: 'orange',
+  },
 ];
-
-const isStage3Completed = (topicKey, completedTopics) => {
-  if (!completedTopics || !Array.isArray(completedTopics)) return false;
-  if (completedTopics.includes(topicKey)) return true;
-  return (
-    completedTopics.includes(`${topicKey}-easy`) &&
-    completedTopics.includes(`${topicKey}-medium`) &&
-    completedTopics.includes(`${topicKey}-hard`)
-  );
-};
 
 /**
  * Home Component
- * Main menu screen displaying all available quizzes in categorized sections with section filtering.
+ * Main menu screen displaying 8 Section Cards outer view, drill-down section puzzles, and global search.
  */
 export default function Home({
   onSelect,
-  onBackToLanding,
   completedTopics = [],
   goldMastery = [],
   isGoalSelection = false,
@@ -46,95 +87,98 @@ export default function Home({
   const [showAbout, setShowAbout] = useState(false);
   const [search, setSearch] = useState('');
   const [pmOpen, setPmOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [activeSections, setActiveSections] = useState([]);
-  const searchInputRef = useRef(null);
 
   const isSearching = search.trim() !== '';
-  const filteredRegular = isSearching
+
+  // Global search across all 95 tiles across all 8 sections
+  const query = search.trim().toLowerCase();
+  const searchMatches = isSearching
     ? TILES.filter(
         (a) =>
-          a.name.toLowerCase().includes(search.toLowerCase()) ||
-          a.subtitle.toLowerCase().includes(search.toLowerCase())
+          a.name.toLowerCase().includes(query) ||
+          a.subtitle.toLowerCase().includes(query)
       )
-    : TILES;
+    : [];
 
-  const counts = { all: filteredRegular.length };
+  const searchCounts = { all: searchMatches.length };
   HOME_SECTIONS.forEach(({ key }) => {
-    counts[key] = filteredRegular.filter((app) => (app.category || 'shelf') === key).length;
+    searchCounts[key] = searchMatches.filter((app) => (app.category || 'shelf') === key).length;
   });
 
-  const visibleSections =
-    activeSections.length === 0
-      ? HOME_SECTIONS
-      : HOME_SECTIONS.filter((s) => activeSections.includes(s.key));
+  const filteredSearchResults =
+    activeSections.length > 0
+      ? searchMatches.filter((app) => activeSections.includes(app.category || 'shelf'))
+      : searchMatches;
+
+  const handleSearchChange = (val) => {
+    // If starting a search from inside a drilled-down section and no custom filter is active yet
+    if (!search && val.trim() !== '' && selectedSection && activeSections.length === 0) {
+      setActiveSections([selectedSection]);
+    }
+    setSearch(val);
+  };
+
+  const handleClearSearch = () => {
+    setSearch('');
+    setActiveSections([]);
+  };
+
+  const renderMenuCard = (app) => (
+    <MenuCard
+      key={app.key}
+      app={app}
+      isCompleted={isStage3Completed(app.key, completedTopics)}
+      isGold={Boolean(goldMastery && goldMastery.includes(app.key))}
+      onSelect={onSelect}
+    />
+  );
+
+  const currentSection = selectedSection
+    ? HOME_SECTIONS.find((s) => s.key === selectedSection)
+    : null;
+  const sectionTiles = selectedSection
+    ? TILES.filter((app) => (app.category || 'shelf') === selectedSection)
+    : [];
 
   return (
     <>
-      <div style={{ position: 'relative' }}>
-        {isGoalSelection && onBack && (
+      <div className="home-top-header">
+        {isGoalSelection && onBack && !selectedSection && (
           <button
+            type="button"
             onClick={onBack}
-            style={{
-              position: 'absolute',
-              top: '8px',
-              left: '0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'var(--clr-card)',
-              border: '1.5px solid var(--clr-border)',
-              color: 'var(--clr-text)',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.85rem',
-              fontWeight: '500',
-              transition: 'all var(--transition)',
-            }}
-            onMouseEnter={(e) => (e.target.style.background = 'var(--clr-hover-strong)')}
-            onMouseLeave={(e) => (e.target.style.background = 'var(--clr-card)')}
+            className="home-back-btn"
+            aria-label="Back to dashboard"
           >
             ← Back to Dashboard
           </button>
         )}
 
-        {!isGoalSelection && onBackToLanding && (
+        {selectedSection && (
           <button
-            onClick={onBackToLanding}
-            style={{
-              position: 'absolute',
-              top: '8px',
-              left: '0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'var(--clr-card)',
-              border: '1.5px solid var(--clr-border)',
-              color: 'var(--clr-text)',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.85rem',
-              fontWeight: '500',
-              transition: 'all var(--transition)',
+            type="button"
+            onClick={() => {
+              setSelectedSection(null);
+              setActiveSections([]);
             }}
-            onMouseEnter={(e) => (e.target.style.background = 'var(--clr-hover-strong)')}
-            onMouseLeave={(e) => (e.target.style.background = 'var(--clr-card)')}
+            className="home-back-btn"
+            aria-label="Back to all sections"
           >
-            ← Overview
+            ← All Sections
           </button>
         )}
 
         <div
+          className="home-header-center"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '16px',
             marginBottom: '4px',
-            paddingTop: isGoalSelection || onBackToLanding ? '44px' : '0',
+            paddingTop: (isGoalSelection || selectedSection) ? '44px' : '0',
           }}
         >
           <img src="/tenali.png" alt="Tenali Raman" style={{ width: '80px', height: 'auto', flexShrink: 0 }} />
@@ -159,7 +203,7 @@ export default function Home({
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
-      {!search && !isGoalSelection && (
+      {!search && !isGoalSelection && !selectedSection && (
         <div className="journey-banner-row">
           <button className="journey-banner-btn" onClick={() => onSelect('learning_journey')}>
             <div className="journey-banner-content">
@@ -176,103 +220,64 @@ export default function Home({
         </div>
       )}
 
-      {!search && !isGoalSelection && <PmQuestBanner onSelect={onSelect} />}
+      {!search && !isGoalSelection && !selectedSection && <PmQuestBanner onSelect={onSelect} />}
 
-      {!search && !isGoalSelection && (
+      {!search && !isGoalSelection && !selectedSection && (
         <DailyWarmupCard completedTopics={completedTopics} apiBase={API} onSelectTopic={onSelect} />
       )}
 
-      <div className="search-bar-row">
-        <div className="search-bar-wrapper">
-          <input
-            id="tour-search-bar"
-            ref={searchInputRef}
-            className="search-bar"
-            type="text"
-            placeholder="Search puzzles…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setSearch('');
-              }
-            }}
-          />
-          {search && (
-            <button
-              type="button"
-              className="search-clear-btn"
-              onClick={() => {
-                setSearch('');
-                searchInputRef.current?.focus();
-              }}
-              aria-label="Clear search"
-              title="Clear search"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      </div>
+      <SearchBar
+        id="tour-search-bar"
+        placeholder={
+          selectedSection && currentSection
+            ? `Search in ${currentSection.title}!`
+            : 'Search all Puzzles across all Sections!'
+        }
+        value={search}
+        onChange={handleSearchChange}
+        onClear={handleClearSearch}
+      />
 
-      {!search && !isGoalSelection && (
+      {!search && !isGoalSelection && !selectedSection && (
         <PmHomeSection onSelect={onSelect} onOpenGoalPicker={() => setPmOpen(true)} />
       )}
 
-      {/* Section Filter Bar & Modal Trigger */}
-      <SectionFilterBar
-        sections={HOME_SECTIONS}
-        activeSections={activeSections}
-        onSelectSections={setActiveSections}
-        counts={counts}
-      />
+      {/* Main Content Area */}
+      {isSearching && (
+        <GlobalSearchResults
+          id="tour-home-grid"
+          search={search}
+          filteredResults={filteredSearchResults}
+          searchCounts={searchCounts}
+          activeSections={activeSections}
+          setActiveSections={setActiveSections}
+          sections={HOME_SECTIONS}
+          renderCard={renderMenuCard}
+          onClearSearch={handleClearSearch}
+        />
+      )}
 
-      {/* Categorized Sections (#201, #202, #203) */}
-      <div id="tour-home-grid">
-        {visibleSections.map(({ key, title }) => {
-          const sectionApps = filteredRegular.filter((app) => (app.category || 'shelf') === key);
-          if (sectionApps.length === 0) return null;
+      {!isSearching && selectedSection && (
+        <SectionDrilldownView
+          id="tour-home-grid"
+          section={currentSection}
+          tiles={sectionTiles}
+          completedTopics={completedTopics}
+          goldMastery={goldMastery}
+          renderCard={renderMenuCard}
+        />
+      )}
 
-          return (
-            <section key={key} className="home-section">
-              <h2 className="home-section-title">{title}</h2>
-              <div className="menu-grid">
-                {sectionApps.map((app) => {
-                  const isGold = goldMastery && goldMastery.includes(app.key);
-                  const isCompleted = isStage3Completed(app.key, completedTopics);
-                  return (
-                    <button
-                      key={app.key}
-                      className={`menu-card ${isGold ? 'gold-card' : app.color}`}
-                      onClick={() => {
-                        if (app.isRedirect) {
-                          navigate(app.path);
-                        } else {
-                          onSelect(app.key);
-                        }
-                      }}
-                    >
-                      <span className="menu-title">
-                        {app.name}
-                        {isGold && <span className="badge-indicator">🥇</span>}
-                        {!isGold && isCompleted && <span className="badge-indicator">✅</span>}
-                      </span>
-                      <span className="menu-subtitle">{app.subtitle}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
-
-        {activeSections.length > 0 &&
-          visibleSections.every((s) => counts[s.key] === 0) && (
-            <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--clr-text-soft)' }}>
-              No puzzles found matching &quot;{search}&quot; in the selected section{activeSections.length > 1 ? 's' : ''}.
-            </div>
-          )}
-      </div>
+      {!isSearching && !selectedSection && (
+        <CategoryCardsGrid
+          id="tour-home-grid"
+          sections={HOME_SECTIONS}
+          tiles={TILES}
+          completedTopics={completedTopics}
+          goldMastery={goldMastery}
+          onSelectSection={setSelectedSection}
+        />
+      )}
 
       <PmGoalModal open={pmOpen} onClose={() => setPmOpen(false)} onSelect={onSelect} />
     </>
