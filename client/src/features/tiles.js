@@ -93,6 +93,7 @@ export const TILES = [
     { key: 'trig', name: 'Trigonometry', subtitle: 'SOH-CAH-TOA, sine/cosine rule', color: 'green', category: 'shape-space' },
     { key: 'variation', name: 'Variation', subtitle: 'Direct & inverse proportion', color: 'purple', category: 'algebra' },
     { key: 'vectors', name: 'Vectors', subtitle: 'Add, scale, magnitude', color: 'blue', category: 'linear-algebra' },
+    { key: 'vachana', name: 'Vachana', subtitle: 'Mathematical Literacy Lab', color: 'purple', category: 'shelf' },
     { key: 'vocab', name: 'Vocabulary', subtitle: 'Match words to definitions', color: 'green', category: 'shelf' },
     { key: 'spot', name: 'Twin Hunt', subtitle: 'Find the common object', color: 'purple', category: 'shelf' },
     { key: 'gymdecimals', name: 'Decimals', subtitle: 'Signed decimal × decimal — 1-digit MCQ', color: 'purple', category: 'number-foundations', foldInto: 'decimals' },
