@@ -127,6 +127,12 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
             />
           )}
 
+          <DropdownItem
+            onClick={() => handleSelect('pathmap')}
+            title="📍 Learning Path"
+            subtitle="Prerequisite graph & personalized roadmap"
+          />
+
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
           {/* Section 2: Practice Modes & Quiz Builders */}
@@ -148,12 +154,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
           {/* Section 3: Extended Hubs & Review */}
-          <DropdownItem
-            onClick={() => handleSelect('realworld')}
-            title="🌍 Real-World"
-            subtitle="Math pathways through real phenomena"
-          />
-
           <DropdownItem
             onClick={() => handleRedirect('/playground')}
             title="💻 Code Playground"

@@ -78,6 +78,13 @@ const HOME_SECTIONS = [
     subtitle: 'Crosswords, Word Searches, Word Creator, Vocabulary & Vachana',
     color: 'teal',
   },
+  {
+    key: 'real-world',
+    title: 'Real World',
+    icon: '🌍',
+    subtitle: 'Phenomenon pathways, road trips & practical mathematics',
+    color: 'teal',
+  },
 ];
 
 /**

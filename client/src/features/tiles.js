@@ -111,7 +111,7 @@ export const TILES = [
     { key: 'water-jug-lab', name: '🧪 Water Jug Lab', subtitle: 'GCD discovery — 13-level progression', color: 'teal', category: 'shelf' },
     { key: 'equation-crafting-lab', name: '⚗️ Equation Crafting Lab', subtitle: 'Build expressions in the mixing pot', color: 'orange', category: 'algebra' },
     { key: 'contrastlist', name: 'Contrast Challenge', subtitle: 'Distinguish similar concepts', color: 'featured', category: 'shelf' },
-    { key: 'pathmap', name: '📍 Learning Path', subtitle: 'Prerequisite graph & personalized path', color: 'orange', category: 'shelf' },
+    { key: 'carjourney', name: 'The Car Journey', subtitle: '16 stops from wheel counting to suspension equations', color: 'teal', category: 'real-world' },
 ]
 
 // Hamburger-only entries (#190). Data only -- composition stays in App.jsx.
