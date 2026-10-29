@@ -44,7 +44,6 @@ export const TILES = [
     { key: 'ineq', name: 'Inequalities', subtitle: 'Linear & quadratic inequalities', color: 'green', category: 'algebra' },
     { key: 'integ', name: 'Integration', subtitle: 'Reverse differentiation & areas', color: 'blue', category: 'calculus' },
     { key: 'invtrig', name: 'Inverse Trig', subtitle: 'arcsin, arccos, arctan', color: 'green', category: 'shape-space' },
-    { key: 'language', name: 'Language Dashboard', subtitle: 'Word games, crosswords & spelling', color: 'orange', category: 'language-words' },
     { key: 'crossword', name: 'Crossword Puzzle', subtitle: 'Fill mathematical & vocabulary clues', color: 'orange', category: 'language-words' },
     { key: 'wordsearch', name: 'Word Search', subtitle: 'Hunt words in letter grids', color: 'blue', category: 'language-words' },
     { key: 'wordcreator', name: 'Word Creator', subtitle: 'Build valid words from letter pools', color: 'green', category: 'language-words' },
