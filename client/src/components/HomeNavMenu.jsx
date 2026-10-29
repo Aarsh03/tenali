@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FEATURED_TILES, MATH_LAB_ENTRY, GEOCRAFT_ENTRY } from '../features/tiles';
+import { FEATURED_TILES } from '../features/tiles';
 import { PmHamburgerItem } from '../PathMap';
 import { navigate } from '../lib/router';
 import './HomeNavMenu.css';
@@ -15,7 +15,7 @@ function DropdownItem({ onClick, title, subtitle, style }) {
 
 /**
  * HomeNavMenu
- * Hamburger menu toggle and slide-down drawer with navigation shortcuts.
+ * Hamburger menu toggle and slide-down drawer with platform utilities and meta-modes.
  */
 export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, search = '' }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,8 +32,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
   }, [menuOpen]);
 
   const featuredApps = FEATURED_TILES;
-  const mathLabEntry = MATH_LAB_ENTRY;
-  const geocraftEntry = GEOCRAFT_ENTRY;
 
   const hamburgerApps = [
     ...featuredApps,
@@ -110,6 +108,7 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
 
       {menuOpen && (
         <div className="home-nav-dropdown">
+          {/* Section 1: Platform Utilities & Goals */}
           <DropdownItem
             onClick={() => {
               setMenuOpen(false);
@@ -128,43 +127,13 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
             />
           )}
 
-          {/* Visual Learning Universe & GeoCraft */}
-          {[mathLabEntry, geocraftEntry].map((app) => (
-            <DropdownItem
-              key={app.key}
-              onClick={() => {
-                if (app.isRedirect) {
-                  handleRedirect(app.path);
-                } else {
-                  handleSelect(app.key);
-                }
-              }}
-              title={app.name}
-              subtitle={app.subtitle}
-            />
-          ))}
-
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
-          {/* Real-World hub */}
-          <DropdownItem
-            onClick={() => handleSelect('realworld')}
-            title="🌍 Real-World"
-            subtitle="Math pathways through real phenomena"
-          />
-
-          <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
-
+          {/* Section 2: Practice Modes & Quiz Builders */}
           <DropdownItem
             onClick={() => handleSelect('goalpractice')}
             title="🎯 Goal Practice"
             subtitle="Practice with targets & limits"
-          />
-
-          <DropdownItem
-            onClick={() => handleSelect('riddle')}
-            title="🧩 Math Riddles"
-            subtitle="Find the hidden rule & solve puzzles!"
           />
 
           {filteredHamburgerApps.map((app) => (
@@ -178,16 +147,17 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
 
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
+          {/* Section 3: Extended Hubs & Review */}
+          <DropdownItem
+            onClick={() => handleSelect('realworld')}
+            title="🌍 Real-World"
+            subtitle="Math pathways through real phenomena"
+          />
+
           <DropdownItem
             onClick={() => handleRedirect('/playground')}
             title="💻 Code Playground"
             subtitle="Run code in 50+ languages"
-          />
-
-          <DropdownItem
-            onClick={() => handleSelect('language')}
-            title="Language Puzzles"
-            subtitle="Fill in the blanks to create new words"
           />
 
           <DropdownItem

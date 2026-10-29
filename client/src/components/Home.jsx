@@ -68,8 +68,15 @@ const HOME_SECTIONS = [
     key: 'shelf',
     title: 'Puzzles & Play',
     icon: '🧩',
-    subtitle: 'Detective Agency, Sudoku, GK & Word Riddles',
+    subtitle: 'Battle Arena, Detective Agency, Sudoku, Treasure Hunt & Labs',
     color: 'orange',
+  },
+  {
+    key: 'language-words',
+    title: 'Language & Literacy',
+    icon: '📚',
+    subtitle: 'Crosswords, Word Searches, Word Creator, Vocabulary & Vachana',
+    color: 'teal',
   },
 ];
 

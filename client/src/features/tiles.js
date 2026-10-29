@@ -1,7 +1,7 @@
 // Home-screen tile registry.
 //
 // Extracted from App.jsx (issue #189). This file is intentionally PURE DATA:
-// every entry is { key, name, subtitle, color } and nothing here imports or
+// every entry is { key, name, subtitle, color, category } and nothing here imports or
 // references a React component. That is what makes it safe to edit without
 // touching the App.jsx monolith.
 //
@@ -44,7 +44,10 @@ export const TILES = [
     { key: 'ineq', name: 'Inequalities', subtitle: 'Linear & quadratic inequalities', color: 'green', category: 'algebra' },
     { key: 'integ', name: 'Integration', subtitle: 'Reverse differentiation & areas', color: 'blue', category: 'calculus' },
     { key: 'invtrig', name: 'Inverse Trig', subtitle: 'arcsin, arccos, arctan', color: 'green', category: 'shape-space' },
-    { key: 'language', name: 'Language Puzzles', subtitle: 'Fill in the blanks to create new words', color: 'orange', category: 'shelf' },
+    { key: 'language', name: 'Language Dashboard', subtitle: 'Word games, crosswords & spelling', color: 'orange', category: 'language-words' },
+    { key: 'crossword', name: 'Crossword Puzzle', subtitle: 'Fill mathematical & vocabulary clues', color: 'orange', category: 'language-words' },
+    { key: 'wordsearch', name: 'Word Search', subtitle: 'Hunt words in letter grids', color: 'blue', category: 'language-words' },
+    { key: 'wordcreator', name: 'Word Creator', subtitle: 'Build valid words from letter pools', color: 'green', category: 'language-words' },
     { key: 'limits', name: 'Limits', subtitle: 'Evaluate limits', color: 'purple', category: 'calculus' },
     { key: 'linearalgebra', name: 'Linear Algebra', subtitle: '56 missions across 6 modules', color: 'orange', category: 'linear-algebra' },
     { key: 'lineareq', name: 'Linear Equations', subtitle: 'Solve for x in one variable', color: 'blue', category: 'algebra' },
@@ -93,9 +96,11 @@ export const TILES = [
     { key: 'trig', name: 'Trigonometry', subtitle: 'SOH-CAH-TOA, sine/cosine rule', color: 'green', category: 'shape-space' },
     { key: 'variation', name: 'Variation', subtitle: 'Direct & inverse proportion', color: 'purple', category: 'algebra' },
     { key: 'vectors', name: 'Vectors', subtitle: 'Add, scale, magnitude', color: 'blue', category: 'linear-algebra' },
-    { key: 'vachana', name: 'Vachana', subtitle: 'Mathematical Literacy Lab', color: 'purple', category: 'shelf' },
-    { key: 'vocab', name: 'Vocabulary', subtitle: 'Match words to definitions', color: 'green', category: 'shelf' },
+    { key: 'vachana', name: 'Vachana', subtitle: 'Mathematical Literacy Lab', color: 'purple', category: 'language-words' },
+    { key: 'vocab', name: 'Vocabulary', subtitle: 'Match words to definitions', color: 'green', category: 'language-words' },
     { key: 'spot', name: 'Twin Hunt', subtitle: 'Find the common object', color: 'purple', category: 'shelf' },
+    { key: 'treasurehunt', name: 'Treasure Hunt', subtitle: 'Solve & seek on a treasure grid', color: 'teal', category: 'shelf' },
+    { key: 'riddle', name: 'Math Riddles', subtitle: 'Find the hidden rule & solve puzzles', color: 'purple', category: 'shelf' },
     { key: 'gymdecimals', name: 'Decimals', subtitle: 'Signed decimal × decimal — 1-digit MCQ', color: 'purple', category: 'number-foundations', foldInto: 'decimals' },
     { key: 'guess', name: 'Guess the Number', subtitle: 'Binary magic trick — mind-reading game', color: 'blue', category: 'number-foundations', foldInto: 'bases' },
     { key: 'funcgym', name: 'Functions', subtitle: 'Evaluate small polynomials (MCQ)', color: 'blue', category: 'algebra', foldInto: 'funceval' },
@@ -115,15 +120,10 @@ export const FEATURED_TILES = [
     { key: 'randommix', name: 'Random Mix', subtitle: 'Adaptive cross-topic quiz', color: 'featured' },
     { key: 'custom', name: 'Custom Lesson', subtitle: 'Build your own mixed quiz', color: 'featured' },
     { key: 'gym', name: 'Gym', subtitle: 'Adaptive workout across all 7 gym puzzles', color: 'featured' },
-    { key: 'treasurehunt', name: 'Treasure Hunt', subtitle: 'Solve & seek on a treasure grid', color: 'featured' },
-    { key: 'contrastlist', name: 'Contrast Challenge', subtitle: 'Distinguish similar concepts', color: 'featured' },
-    { key: 'vachana', name: 'Vachana', subtitle: 'Mathematical Literacy Lab', color: 'featured' },
 ]
 
-// Hamburger pin for Visual Learning Universe (#191); also on home grid (#216).
+// Hamburger pin references (kept for backward compatibility)
 export const MATH_LAB_ENTRY = { key: 'math-lab', name: '🔬 Visual Learning Universe', subtitle: 'Visual, Mensuration & Addition labs', color: 'orange' }
-
-// Hamburger pin for GeoCraft (#191); also on home grid (#215).
 export const GEOCRAFT_ENTRY = { key: 'geocraft', name: '📐 GeoCraft', subtitle: 'Interactive Geometry Lab', color: 'featured' }
 
 export default TILES

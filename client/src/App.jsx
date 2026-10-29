@@ -112,6 +112,9 @@ import VisualMathLabRedux, {
 } from './VisualMathLabRedux';
 import CoordinateGrid from './components/CoordinateGrid';
 import LanguageDashboard from './language/LanguageDashboard'
+import CrosswordApp from './language/CrosswordApp'
+import WordSearchApp from './language/WordSearchApp'
+import WordCreatorApp from './language/WordCreatorApp'
 import ContrastChallengeApp, { QuizLayoutExtension } from './ContrastChallengeApp'
 import CoordGeomInteractiveApp from './apps/CoordGeomInteractiveApp.jsx'
 import { VOCAB_CORPUS } from './vocabCorpus'
@@ -41298,22 +41301,6 @@ function TenthApp({ onBack }) {
 
 
 
-const getTopicBadgeType = (topicKey, completedTopicsList) => {
-  if (!completedTopicsList || !Array.isArray(completedTopicsList)) return 'topic_blue';
-  if (completedTopicsList.includes(`${topicKey}-extrahard`) || completedTopicsList.includes(`${topicKey}-hard`) || completedTopicsList.includes(`${topicKey}-adaptive`)) {
-    return 'topic_gold';
-  }
-  if (completedTopicsList.includes(`${topicKey}-medium`)) {
-    return 'topic_silver';
-  }
-  if (completedTopicsList.includes(`${topicKey}-easy`)) {
-    return 'topic_bronze';
-  }
-  if (completedTopicsList.includes(`${topicKey}-started`)) {
-    return 'topic_blue';
-  }
-  return 'topic_blue';
-};
 
 function ComicAdditionApp({ onBack }) {
   const [started, setStarted] = useState(false)
@@ -42375,6 +42362,10 @@ function App() {
   const [celebrationQueue, setCelebrationQueue] = useState([])
   const [transferTopic, setTransferTopic] = useState(null)
   const syncTimeoutRef = useRef(null)
+  const goldMasteryRef = useRef(goldMastery)
+  goldMasteryRef.current = goldMastery
+  const coinsRef = useRef(coins)
+  coinsRef.current = coins
 
   // Generate confetti particles once per active celebration card so they
   // don't teleport to new positions on every parent re-render (timer
@@ -42642,11 +42633,14 @@ function App() {
     }, 1000);
   };
 
-  const markTopicCompleted = (topicKey, difficulty = '') => {
-    const next = addCompletedTopic(topicKey, difficulty);
-    setCompletedTopics(next);
-    syncProgressToServer(next, goldMastery, coins);
-  };
+  const markTopicCompleted = useCallback((topicKey, difficulty = '') => {
+    setCompletedTopics((prev) => {
+      const next = addCompletedTopic(topicKey, difficulty);
+      if (next === prev) return prev;
+      syncProgressToServer(next, goldMasteryRef.current, coinsRef.current);
+      return next;
+    });
+  }, []);
 
   const markGoldMastery = (topicKey) => {
     if (goldMastery.includes(topicKey)) return;
@@ -44677,6 +44671,9 @@ function App() {
     diffeq: DiffEqApp,             // Differential Equations
     tatsavit: TatsavitApp,         // Tatsavit (progressive math drill)
     language: LanguageDashboard,   // Language Puzzles Dashboard
+    crossword: CrosswordApp,
+    wordsearch: WordSearchApp,
+    wordcreator: WordCreatorApp,
     randommix: RandomMixApp,       // Random Mix (adaptive)
     custom: CustomApp,             // Custom lesson builder
     gym: GymApp,                   // Unified adaptive Gym — bundles all 7 below
