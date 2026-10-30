@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SectionDrilldownView from './SectionDrilldownView';
 import CategoryCardsGrid from './CategoryCardsGrid';
+import { TILES } from '../features/tiles';
 
 describe('SectionDrilldownView', () => {
   it('renders section header, puzzle count, and child tiles', () => {
@@ -65,5 +66,21 @@ describe('CategoryCardsGrid', () => {
 
     expect(screen.getByText('Number Foundations')).toBeDefined();
     expect(screen.getByText('Language & Literacy')).toBeDefined();
+  });
+
+  it('correctly maps visual-universe and contrast-challenge tiles from TILES', () => {
+    const visualTiles = TILES.filter(t => t.category === 'visual-universe' && !t.foldInto);
+    expect(visualTiles.length).toBe(4);
+    expect(visualTiles.map(t => t.key)).toEqual([
+      'visual-math-lab-redux',
+      'mensuration-lab',
+      'comic-addition',
+      'basic-arith-lab',
+    ]);
+
+    const contrastTiles = TILES.filter(t => t.category === 'contrast-challenge' && !t.foldInto);
+    expect(contrastTiles.length).toBe(16);
+    expect(contrastTiles.some(t => t.key === 'contrastlist')).toBe(true);
+    expect(contrastTiles.some(t => t.key === 'contrast-area-perimeter')).toBe(true);
   });
 });

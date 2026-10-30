@@ -91,7 +91,6 @@ const HOME_SECTIONS = [
     icon: '⚖️',
     subtitle: 'Distinguish similar concepts & avoid confusion (15 pairs)',
     color: 'featured',
-    directMode: 'contrastlist',
   },
   {
     key: 'visual-universe',
@@ -99,7 +98,6 @@ const HOME_SECTIONS = [
     icon: '🔬',
     subtitle: 'Visual, Mensuration & Balance Scale interactive labs',
     color: 'orange',
-    directMode: 'math-lab',
   },
 ];
 

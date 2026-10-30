@@ -42186,7 +42186,12 @@ function App() {
   const [mode, setMode] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      return params.get('mode') || null;
+      const m = params.get('mode');
+      if (m && m.startsWith('contrast-')) {
+        localStorage.setItem('tenali-start-contrast-id', m.replace(/^contrast-/, ''));
+        return 'contrastlist';
+      }
+      return m || null;
     } catch {
       return null;
     }
@@ -42693,7 +42698,13 @@ function App() {
   useEffect(() => {
     const handleModeChange = (e) => {
       if (e.detail) {
-        setMode(e.detail);
+        if (typeof e.detail === 'string' && e.detail.startsWith('contrast-')) {
+          const pairId = e.detail.replace(/^contrast-/, '');
+          try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
+          setMode('contrastlist');
+        } else {
+          setMode(e.detail);
+        }
       }
     };
     window.addEventListener('tenali-change-mode', handleModeChange);
@@ -44767,7 +44778,13 @@ function App() {
             setIsGoalMode(false);
           }}
           onSelect={(key) => {
-            setMode(key);
+            if (key && key.startsWith('contrast-')) {
+              const pairId = key.replace(/^contrast-/, '');
+              try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
+              setMode('contrastlist');
+            } else {
+              setMode(key);
+            }
             setIsGoalMode(true);
           }}
         />
@@ -44826,6 +44843,11 @@ function App() {
             // PROTOTYPE: ONLY Angles enters the Learn/Test gateway
             setIsGoalMode(false);
             handleSelectMode(key);
+          } else if (key && key.startsWith('contrast-')) {
+            const pairId = key.replace(/^contrast-/, '');
+            try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
+            setMode('contrastlist');
+            setIsGoalMode(false);
           } else {
             // All other topics bypass the gateway and go straight to quiz configuration
             setMode(key);
@@ -44897,6 +44919,12 @@ function App() {
   }
 
   const handleSelectMode = (key) => {
+    if (key && key.startsWith('contrast-')) {
+      const pairId = key.replace(/^contrast-/, '');
+      try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
+      setMode('contrastlist');
+      return;
+    }
     setMode(key)
     setLearningPhase('select')
     setRevealedBlocks(1)
@@ -45252,6 +45280,11 @@ function App() {
             } else if (topicKey === 'angles') {
               setIsGoalMode(false);
               handleSelectMode(topicKey);
+            } else if (topicKey && topicKey.startsWith('contrast-')) {
+              const pairId = topicKey.replace(/^contrast-/, '');
+              try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
+              setMode('contrastlist');
+              setIsGoalMode(false);
             } else {
               setMode(topicKey);
               setIsGoalMode(false);
