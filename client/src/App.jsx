@@ -5319,7 +5319,7 @@ function SuperTables1App() {
         <div style={{ maxWidth: 620, margin: '0 auto' }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <button onClick={goHome} style={S.back}>← Home</button>
+            <button onClick={goHome} style={S.back}>← Back</button>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--clr-text-soft)' }}>Table of {tableNum}</div>
               <div style={{ fontSize: '1rem', fontWeight: 800, color: phase === 1 ? 'var(--clr-accent)' : 'var(--clr-correct)' }}>
@@ -9657,7 +9657,7 @@ function Chapter5App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 5 — Fractions, Percentages & Standard Form</h1>
@@ -10740,7 +10740,7 @@ function Chapter6App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 6 — Equations, Factors and Formulae</h1>
@@ -12416,7 +12416,7 @@ function Chapter7App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 7 — Perimeter, Area & Volume</h1>
@@ -13916,7 +13916,7 @@ function Chapter8App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 8 — Introduction to Probability</h1>
@@ -15602,7 +15602,7 @@ function Chapter9App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 9 — Sequences, Surds & Sets</h1>
@@ -17290,7 +17290,7 @@ function Chapter10App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 10 — Straight Lines Sequences, Surds & Sets Quadratic Equations</h1>
@@ -18837,7 +18837,7 @@ function Chapter11App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 11 — Straight Lines Sequences, Surds & Sets Quadratic Equations</h1>
@@ -20390,7 +20390,7 @@ function Chapter12App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 12 — Straight Lines Sequences, Surds & Sets Quadratic Equations</h1>
@@ -21778,7 +21778,7 @@ function Chapter13App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 13 — Straight Lines Sequences, Surds & Sets Quadratic Equations</h1>
@@ -23315,7 +23315,7 @@ function Chapter14App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 14 — Further Equations & Inequalities</h1>
@@ -24983,7 +24983,7 @@ function Chapter15App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -26123,7 +26123,7 @@ function Chapter16App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -27516,7 +27516,7 @@ function Chapter17App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -29175,7 +29175,7 @@ function Chapter18App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -30572,7 +30572,7 @@ function Chapter19App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -31836,7 +31836,7 @@ function Chapter20App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -33363,7 +33363,7 @@ function Chapter21App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter  — Scale Drawings, Bearings & Trigonometry</h1>
@@ -34719,7 +34719,7 @@ function Chapter22App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 22 — More Equations, Formulae & Functions</h1>
@@ -36197,7 +36197,7 @@ function Chapter23App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 23 — Transformations & Vectors</h1>
@@ -37630,7 +37630,7 @@ function Chapter24App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 24 — Probability with Tree & Venn Diagrams</h1>
@@ -38480,7 +38480,7 @@ function Chapter1App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 1 — Reviewing Number Concepts</h1>
@@ -39301,7 +39301,7 @@ function Chapter2App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 2 — Making Sense of Algebra</h1>
@@ -40097,7 +40097,7 @@ function Chapter3App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 3 — Lines, Angles and Shapes</h1>
@@ -40891,7 +40891,7 @@ function Chapter4App({ onBack }) {
     return (
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
           <button className="back-button" style={{ marginLeft: 'auto' }} onClick={resetAll}>Reset progress</button>
         </div>
         <h1 style={{ marginBottom: 4 }}>Chapter 4 — Collecting, Organising and Displaying Data</h1>
@@ -41216,7 +41216,7 @@ function TenthApp({ onBack }) {
   return (
     <div style={{ maxWidth: 980, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
-        <button className="back-button" onClick={onBack}>← Home</button>
+        <button className="back-button" onClick={onBack}>← Back</button>
       </div>
       {user && (
         <p style={{ margin: '0 0 12px', fontSize: '1.1rem', opacity: 0.85 }}>
@@ -42176,6 +42176,13 @@ function BalanceScaleApp({ onBack }) {
  */
 function PercentPage(props) {
   return <PercentExplanationApp {...props} PercentApp={PercentApp} />;
+}
+
+function getCategoryForMode(modeKey) {
+  if (!modeKey || modeKey === 'goalpractice') return null;
+  if (modeKey === 'contrastlist' || (typeof modeKey === 'string' && modeKey.startsWith('contrast-'))) return 'contrast-challenge';
+  const tile = TILES.find(t => t.key === modeKey);
+  return tile?.category || 'shelf';
 }
 
 function App() {
@@ -44616,7 +44623,7 @@ function App() {
               <p className="welcome-text">Accuracy: {pct}% · Hints used: {hintUsed ? 'Yes' : 'No'}</p>
               <div className="button-row">
                 <button onClick={() => { setStage('setup'); setRiddleType(null) }}>Play Again</button>
-                <button onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back to Home</button>
+                <button onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back</button>
               </div>
             </div>
           )}
@@ -44821,6 +44828,10 @@ function App() {
             setIsGoalMode(false);
           }}
           onSelect={(key) => {
+            const cat = getCategoryForMode(key);
+            if (cat) {
+              setSelectedHomeSection(cat);
+            }
             if (key && key.startsWith('contrast-')) {
               const pairId = key.replace(/^contrast-/, '');
               try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
@@ -44967,10 +44978,13 @@ function App() {
   }
 
   const handleSelectMode = (key) => {
+    const cat = getCategoryForMode(key);
+    if (cat) {
+      setSelectedHomeSection(cat);
+    }
     if (key && key.startsWith('contrast-')) {
       const pairId = key.replace(/^contrast-/, '');
       try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-      setSelectedHomeSection('contrast-challenge');
       setMode(key);
       return;
     }
@@ -44982,6 +44996,10 @@ function App() {
   }
 
   const handleBackToHome = () => {
+    const currentCat = getCategoryForMode(mode);
+    if (currentCat) {
+      setSelectedHomeSection(currentCat);
+    }
     setMode(null)
     setLearningPhase(null)
     setRevealedBlocks(1)
@@ -44999,7 +45017,7 @@ function App() {
         <div className="card">
           <div style={{ maxWidth: 640, margin: '0 auto', padding: '1.5rem 1rem', color: 'var(--clr-text)' }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-              <button className="back-button" onClick={handleBackToHome}>← Home</button>
+              <button className="back-button" onClick={handleBackToHome}>← Back</button>
             </div>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
               <h1 style={{ marginBottom: 8, fontSize: '2.5rem' }}>{topicName}</h1>
@@ -45324,6 +45342,10 @@ function App() {
           }}
           onSelectTopic={(topicKey) => {
             setCurrentView('puzzles');
+            const cat = getCategoryForMode(topicKey);
+            if (cat) {
+              setSelectedHomeSection(cat);
+            }
             if (topicKey === 'goalpractice') {
               setMode('goalpractice');
             } else if (topicKey === 'angles') {
@@ -48118,7 +48140,7 @@ function ColumnAdditionApp({ onBack, initialDifficulty, initialNumQuestions, ini
     return (
       <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
-          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Back</button>
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Addition</h1>
           <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Add numbers vertically with carrying</p>
           <div style={{ marginBottom: '24px' }}>
@@ -48736,7 +48758,7 @@ function ColumnMultiplicationApp({ onBack, initialDifficulty, initialNumQuestion
     return (
       <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
-          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Back</button>
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Multiplication</h1>
           <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Multiply vertically with carrying</p>
 
@@ -49408,7 +49430,7 @@ function ColumnDivisionApp({ onBack, initialDifficulty, initialNumQuestions, ini
     return (
       <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
-          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>{'\u2190'} Home</button>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>{'\u2190'} Back</button>
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Division</h1>
           <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Paper-style long division with step-by-step work</p>
 
@@ -49987,7 +50009,7 @@ function ColumnSubtractionApp({ onBack, initialDifficulty, initialNumQuestions, 
     return (
       <div style={{ minHeight: '100vh', background: 'var(--clr-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ background: 'var(--clr-card)', border: '1.5px solid var(--clr-border)', borderRadius: '28px', boxShadow: '0 20px 40px rgba(0,0,0,.45)', padding: '48px 40px', maxWidth: '720px', width: '100%', textAlign: 'center', position: 'relative' }}>
-          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Home</button>
+          <button onClick={onBack} style={{ position: 'absolute', top: '24px', left: '24px', background: 'transparent', border: '1px solid var(--clr-border)', borderRadius: '6px', padding: '6px 14px', color: 'var(--clr-text-soft)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Back</button>
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: 'var(--clr-text)', margin: '0 0 12px', lineHeight: 1.1 }}>Column Subtraction</h1>
           <p style={{ color: 'var(--clr-text-soft)', fontSize: '0.9rem', margin: '0 0 24px', fontFamily: 'Inter, sans-serif', fontWeight: 400 }}>Subtract vertically with borrowing</p>
 
@@ -50621,7 +50643,7 @@ const fetchQuestion = async (selectedDifficulty = difficulty) => {
             position: 'absolute', top: '24px', left: '24px', background: 'transparent',
             border: '1px solid #5B5048', borderRadius: '6px', padding: '6px 14px',
             color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-          }}>← Home</button>
+          }}>← Back</button>
 
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: '#F4F1ED', margin: '0 0 12px', lineHeight: 1.1 }}>
             Addition
@@ -51729,7 +51751,7 @@ function GymQuiz({ title, subtitle, typeKeys, welcomeText, algebraInput, onBack 
         <div className="kid-card" style={{ marginTop: '5vh' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1>{title}</h1>
-            <button className="kid-back-btn" onClick={onBack}>← Home</button>
+            <button className="kid-back-btn" onClick={onBack}>← Back</button>
           </div>
           <p className="subtitle">{subtitle}</p>
 
@@ -51822,7 +51844,7 @@ function GymQuiz({ title, subtitle, typeKeys, welcomeText, algebraInput, onBack 
           <ResultsTable results={results} />
           <div className="button-row" style={{ gap: '0.5rem' }}>
             <button onClick={() => { setStarted(false); setFinished(false); setAdaptive(false) }}>Play Again</button>
-            <button onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back to Home</button>
+            <button onClick={onBack} style={{ background: 'transparent', border: '1px solid var(--clr-accent)', color: 'var(--clr-accent)' }}>Back</button>
           </div>
         </div>
       )}
@@ -55275,7 +55297,7 @@ function makeQuizApp({ title, subtitle, apiPath, diffLabels, placeholders, tip, 
               position: 'absolute', top: '24px', left: '24px', background: 'transparent',
               border: '1px solid #5B5048', borderRadius: '6px', padding: '6px 14px',
               color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-            }}>← Home</button>
+            }}>← Back</button>
 
             <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: '#F4F1ED', margin: '0 0 12px', lineHeight: 1.1 }}>
               {title}
@@ -57513,7 +57535,7 @@ function TatsavitApp({ onBack }) {
   if (homeScreen && !drillingScreen && !summaryScreen) {
     return (
       <div style={baseStyles.container}>
-        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Home</button>
+        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Back</button>
         <div style={baseStyles.card}>
           <h1 style={baseStyles.title}>Tatsavit</h1>
           <p style={baseStyles.subtitle}>Algebra Simplification Drill</p>
@@ -57550,7 +57572,7 @@ function TatsavitApp({ onBack }) {
 
     return (
       <div style={baseStyles.container}>
-        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Home</button>
+        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Back</button>
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
           <div style={baseStyles.progressPill}>Level {level}</div>
           <div style={baseStyles.progressPill}>{levelInfo}</div>
@@ -57610,7 +57632,7 @@ function TatsavitApp({ onBack }) {
   if (summaryScreen && !homeScreen && !drillingScreen) {
     return (
       <div style={baseStyles.container}>
-        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Home</button>
+        <button onClick={onBack} style={{ ...baseStyles.buttonSecondary, alignSelf: 'flex-start', marginBottom: '16px' }}>← Back</button>
         <div style={baseStyles.card}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '16px' }}>Drill Complete!</h2>
           <p style={{ fontSize: '2rem', fontWeight: 600, color: 'var(--clr-accent)', marginBottom: '8px' }}>Score: {score}</p>
@@ -57622,7 +57644,7 @@ function TatsavitApp({ onBack }) {
           </p>
           <div style={baseStyles.buttonRow}>
             <button onClick={startDrill} style={baseStyles.button}>Try Again</button>
-            <button onClick={goHome} style={{ ...baseStyles.button, background: 'var(--clr-text-soft)' }}>Back to Home</button>
+            <button onClick={goHome} style={{ ...baseStyles.button, background: 'var(--clr-text-soft)' }}>Back</button>
           </div>
         </div>
       </div>
@@ -57975,7 +57997,7 @@ function GuessNumberApp({ onBack }) {
   return (
     <>
       <div className="header-row">
-        <button className="back-button" onClick={onBack}>← Home</button>
+        <button className="back-button" onClick={onBack}>← Back</button>
       </div>
       <h1>Guess the Number</h1>
       <p className="subtitle">Think of a number from 0 to 31 — I'll find it!</p>
@@ -69056,7 +69078,7 @@ export function QuizLayout({ title, subtitle, onBack, children, timer, sessionGo
   return (
     <>
       <div className="header-row">
-        <button className="back-button" onClick={onBack}>← Home</button>
+        <button className="back-button" onClick={onBack}>← Back</button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {goalBadge}
           {timerDisplay}
@@ -69842,7 +69864,7 @@ function ProgressTrackerApp({ onBack }) {
   return (
     <>
       <div className="header-row">
-        <button className="back-button" onClick={onBack}>← Home</button>
+        <button className="back-button" onClick={onBack}>← Back</button>
       </div>
       <h1>Track Progress</h1>
 
@@ -70142,7 +70164,7 @@ function GenericLabApp({ title, subtitle, endpoint, onBack, renderQuestionCustom
             position: 'absolute', top: '24px', left: '24px', background: 'transparent',
             border: '1px solid #5B5048', borderRadius: '6px', padding: '6px 14px',
             color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-          }}>← Home</button>
+          }}>← Back</button>
 
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: '#F4F1ED', margin: '0 0 12px', lineHeight: 1.1 }}>
             {title.replace('🔷 ', '')}
@@ -70257,7 +70279,7 @@ function GenericLabApp({ title, subtitle, endpoint, onBack, renderQuestionCustom
           </div>
           <div className="button-row" style={{ marginTop: '30px' }}>
             <button className="kid-btn-primary" onClick={() => { setStarted(false); setFinished(false); }}>Play Again 🔄</button>
-            <button className="kid-back-btn" onClick={onBack} style={{ marginLeft: '15px' }}>← Back to Home</button>
+            <button className="kid-back-btn" onClick={onBack}>← Back</button>
           </div>
         </div>
       )}

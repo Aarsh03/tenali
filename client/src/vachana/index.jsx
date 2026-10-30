@@ -269,7 +269,7 @@ export default function Vachana({ onBack }) {
             <p className="subtitle" style={{ margin: '4px 0 0 0' }}>Learn to parse, translate, and communicate in the language of mathematics</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="back-button" onClick={onBack}>← Back to Home</button>
+            <button className="back-button" onClick={onBack}>← Back</button>
           </div>
         </div>
       )}

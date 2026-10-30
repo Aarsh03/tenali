@@ -741,7 +741,7 @@ export default function VisualMathLabRedux({ onBack, initialDifficulty, initialN
       {/* ── START ───────────────────────────────────────────────── */}
       {!started && !finished && (
         <div style={{ background:'#2D2520', border:'1.5px solid #4A4038', borderRadius:'28px', boxShadow:'0 20px 40px rgba(0,0,0,.45)', padding:'48px 40px', maxWidth:'720px', width:'100%', textAlign:'center', position:'relative', margin:'auto', zIndex:10 }}>
-          <button onClick={onBack} style={{ position:'absolute', top:'24px', left:'24px', background:'transparent', border:'1px solid #5B5048', borderRadius:'6px', padding:'6px 14px', color:'#A89C93', fontFamily:'Inter, sans-serif', fontWeight:600, fontSize:'0.85rem', cursor:'pointer', zIndex:20 }}>← Home</button>
+          <button onClick={onBack} style={{ position:'absolute', top:'24px', left:'24px', background:'transparent', border:'1px solid #5B5048', borderRadius:'6px', padding:'6px 14px', color:'#A89C93', fontFamily:'Inter, sans-serif', fontWeight:600, fontSize:'0.85rem', cursor:'pointer', zIndex:20 }}>← Back</button>
           <h1 style={{ fontFamily:'Georgia, "Times New Roman", serif', fontWeight:700, fontSize:'48px', color:'#F4F1ED', margin:'0 0 12px', lineHeight:1.1 }}>Multiplication &amp; division</h1>
           <p style={{ color:'#988D84', fontSize:'0.9rem', margin:'0 0 40px', fontFamily:'Inter, sans-serif', fontWeight:400 }}>Practice multiplication and division!</p>
           <div style={{ marginBottom:'24px' }}>

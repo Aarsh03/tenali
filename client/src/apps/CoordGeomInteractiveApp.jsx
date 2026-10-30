@@ -126,8 +126,7 @@ export default function CoordGeomInteractiveApp({ onBack }) {
           <button onClick={onBack} style={{
             position: 'absolute', top: '24px', left: '24px', background: 'transparent',
             border: '1px solid #5B5048', borderRadius: '6px', padding: '6px 14px',
-            color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-          }}>← Home</button>
+            color: '#A89C93', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}>← Back</button>
 
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '48px', color: '#F4F1ED', margin: '0 0 12px', lineHeight: 1.1 }}>
             Coordinate Geometry

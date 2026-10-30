@@ -391,7 +391,7 @@ export default function ContrastChallengeApp({ onBack, pairId: propPairId }) {
     return (
       <>
         <div className="header-row">
-          <button className="back-button" onClick={onBack}>← Home</button>
+          <button className="back-button" onClick={onBack}>← Back</button>
         </div>
         <h1>Contrast Challenge</h1>
         <p className="subtitle">Distinguish similar concepts</p>

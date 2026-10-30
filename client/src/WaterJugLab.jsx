@@ -972,7 +972,7 @@ export default function WaterJugLab({ onBack }) {
                 borderRadius: '8px', padding: '8px 16px', color: 'var(--clr-text-soft)',
                 fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.2)', display: 'inline-flex', alignItems: 'center', gap: '6px'
-              }}>← Home</button>
+              }}>← Back</button>
             )}
           </div>
 
