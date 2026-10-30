@@ -126,7 +126,6 @@ export const TILES = [
     { key: 'contrast-prime-composite', name: 'Prime vs Composite', subtitle: 'Exactly two factors vs composite products', color: 'featured', category: 'contrast-challenge' },
     { key: 'contrast-radius-diameter', name: 'Radius vs Diameter', subtitle: 'Center to edge vs edge to edge through center', color: 'featured', category: 'contrast-challenge' },
     { key: 'contrast-trig-inverse-trig', name: 'Trig vs Inverse Trig', subtitle: 'Angle to side ratio vs ratio back to angle', color: 'featured', category: 'contrast-challenge' },
-    { key: 'contrastlist', name: 'All Contrast Challenges', subtitle: 'Full interactive 15-pair challenge library', color: 'featured', category: 'contrast-challenge' },
     { key: 'carjourney', name: 'The Car Journey', subtitle: '16 stops from wheel counting to suspension equations', color: 'teal', category: 'real-world' },
 ]
 

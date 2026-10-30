@@ -111,12 +111,25 @@ export default function Home({
   goldMastery = [],
   isGoalSelection = false,
   onBack,
+  selectedSection: propSelectedSection,
+  onSelectSection: propOnSelectSection,
 }) {
   const [showAbout, setShowAbout] = useState(false);
   const [search, setSearch] = useState('');
   const [pmOpen, setPmOpen] = useState(false);
-  const [selectedSection, setSelectedSection] = useState(null);
+  const [internalSelectedSection, setInternalSelectedSection] = useState(null);
   const [activeSections, setActiveSections] = useState([]);
+
+  const isControlled = propSelectedSection !== undefined;
+  const selectedSection = isControlled ? propSelectedSection : internalSelectedSection;
+  const setSelectedSection = (sec) => {
+    if (propOnSelectSection) {
+      propOnSelectSection(sec);
+    }
+    if (!isControlled) {
+      setInternalSelectedSection(sec);
+    }
+  };
 
   const isSearching = search.trim() !== '';
 

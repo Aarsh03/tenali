@@ -79,8 +79,8 @@ describe('CategoryCardsGrid', () => {
     ]);
 
     const contrastTiles = TILES.filter(t => t.category === 'contrast-challenge' && !t.foldInto);
-    expect(contrastTiles.length).toBe(16);
-    expect(contrastTiles.some(t => t.key === 'contrastlist')).toBe(true);
+    expect(contrastTiles.length).toBe(15);
+    expect(contrastTiles.some(t => t.key === 'contrastlist')).toBe(false);
     expect(contrastTiles.some(t => t.key === 'contrast-area-perimeter')).toBe(true);
   });
 });

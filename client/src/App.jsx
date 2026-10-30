@@ -42189,13 +42189,43 @@ function App() {
       const m = params.get('mode');
       if (m && m.startsWith('contrast-')) {
         localStorage.setItem('tenali-start-contrast-id', m.replace(/^contrast-/, ''));
-        return 'contrastlist';
+        return m;
+      }
+      if (m === 'contrastlist') {
+        return null;
       }
       return m || null;
     } catch {
       return null;
     }
   })
+
+  // Currently selected section on Home (null = cards grid, or section key like 'contrast-challenge')
+  const [selectedHomeSection, setSelectedHomeSection] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get('mode');
+      const sec = params.get('section');
+      if (sec) return sec;
+      if (m === 'contrastlist' || (m && m.startsWith('contrast-'))) return 'contrast-challenge';
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleSelectSection = (sec) => {
+    setSelectedHomeSection(sec);
+    try {
+      const url = new URL(window.location.href);
+      if (sec) {
+        url.searchParams.set('section', sec);
+      } else {
+        url.searchParams.delete('section');
+      }
+      window.history.replaceState({}, '', url.toString());
+    } catch {}
+  };
 
   // Current view when mode is null: 'landing' (full landing page) or 'puzzles' (90+ puzzles grid)
   const [currentView, setCurrentView] = useState(() => {
@@ -42304,17 +42334,20 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const currentMode = params.get('mode');
       const currentParamView = params.get('view');
+      const currentParamSection = params.get('section');
       if (mode) {
         if (currentMode !== mode) {
           window.history.pushState({ mode }, '', `${BASE}/?mode=${mode}`);
         }
       } else {
         if (currentView === 'puzzles') {
-          if (currentParamView !== 'puzzles' || currentMode) {
-            window.history.replaceState({}, '', `${BASE}/?view=puzzles`);
+          const sectionQuery = selectedHomeSection ? `&section=${encodeURIComponent(selectedHomeSection)}` : '';
+          const targetUrl = `${BASE}/?view=puzzles${sectionQuery}`;
+          if (currentParamView !== 'puzzles' || currentMode || currentParamSection !== (selectedHomeSection || null)) {
+            window.history.replaceState({}, '', targetUrl);
           }
         } else {
-          if (currentMode || currentParamView) {
+          if (currentMode || currentParamView || currentParamSection) {
             window.history.replaceState({}, '', `${BASE}/`);
           }
         }
@@ -42322,7 +42355,7 @@ function App() {
     } catch (e) {
       console.error('Failed to sync URL mode:', e);
     }
-  }, [mode, currentView]);
+  }, [mode, currentView, selectedHomeSection]);
 
   // Listen for browser Back/Forward navigation (popstate) to restore mode and view
   useEffect(() => {
@@ -42330,8 +42363,10 @@ function App() {
       try {
         const params = new URLSearchParams(window.location.search);
         const urlMode = params.get('mode') || null;
+        const urlSection = params.get('section') || null;
         const urlView = params.get('view') || (urlMode ? 'puzzles' : 'landing');
         setMode(urlMode);
+        setSelectedHomeSection(urlSection || (urlMode && urlMode.startsWith('contrast-') ? 'contrast-challenge' : null));
         setCurrentView(urlView === 'puzzles' ? 'puzzles' : 'landing');
         if (urlMode === 'angles') {
           setLearningPhase('select');
@@ -42701,7 +42736,11 @@ function App() {
         if (typeof e.detail === 'string' && e.detail.startsWith('contrast-')) {
           const pairId = e.detail.replace(/^contrast-/, '');
           try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-          setMode('contrastlist');
+          setSelectedHomeSection('contrast-challenge');
+          setMode(e.detail);
+        } else if (e.detail === 'contrastlist') {
+          handleSelectSection('contrast-challenge');
+          setMode(null);
         } else {
           setMode(e.detail);
         }
@@ -44708,7 +44747,9 @@ function App() {
   }
 
   // Get the component to render (or null if mode not set)
-  const ActiveApp = mode && mode !== 'goalpractice' ? modeMap[mode] : null
+  const ActiveApp = mode && mode !== 'goalpractice'
+    ? (mode.startsWith('contrast-') ? ContrastChallengeApp : modeMap[mode])
+    : null;
 
   const renderContent = () => {
     if (mode === 'transfer') {
@@ -44773,6 +44814,8 @@ function App() {
           isGoalSelection={true}
           completedTopics={completedTopics}
           goldMastery={goldMastery}
+          selectedSection={selectedHomeSection}
+          onSelectSection={handleSelectSection}
           onBack={() => {
             setMode(null);
             setIsGoalMode(false);
@@ -44781,7 +44824,8 @@ function App() {
             if (key && key.startsWith('contrast-')) {
               const pairId = key.replace(/^contrast-/, '');
               try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-              setMode('contrastlist');
+              setSelectedHomeSection('contrast-challenge');
+              setMode(key);
             } else {
               setMode(key);
             }
@@ -44800,6 +44844,7 @@ function App() {
           markGoldMastery={markGoldMastery}
           updateCoins={updateCoins}
           setMode={setMode}
+          pairId={mode?.startsWith('contrast-') ? mode.replace(/^contrast-/, '') : undefined}
           setTransferTopic={setTransferTopic}
           onBack={journeyContext ? async () => {
             const isCompleted = !!document.querySelector('.final-score');
@@ -44835,6 +44880,8 @@ function App() {
       <Home
         completedTopics={completedTopics}
         goldMastery={goldMastery}
+        selectedSection={selectedHomeSection}
+        onSelectSection={handleSelectSection}
         onSelect={(key) => {
           setCurrentView('puzzles');
           if (key === 'goalpractice') {
@@ -44846,7 +44893,8 @@ function App() {
           } else if (key && key.startsWith('contrast-')) {
             const pairId = key.replace(/^contrast-/, '');
             try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-            setMode('contrastlist');
+            setSelectedHomeSection('contrast-challenge');
+            setMode(key);
             setIsGoalMode(false);
           } else {
             // All other topics bypass the gateway and go straight to quiz configuration
@@ -44922,7 +44970,8 @@ function App() {
     if (key && key.startsWith('contrast-')) {
       const pairId = key.replace(/^contrast-/, '');
       try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-      setMode('contrastlist');
+      setSelectedHomeSection('contrast-challenge');
+      setMode(key);
       return;
     }
     setMode(key)
@@ -45283,7 +45332,8 @@ function App() {
             } else if (topicKey && topicKey.startsWith('contrast-')) {
               const pairId = topicKey.replace(/^contrast-/, '');
               try { localStorage.setItem('tenali-start-contrast-id', pairId); } catch {}
-              setMode('contrastlist');
+              setSelectedHomeSection('contrast-challenge');
+              setMode(topicKey);
               setIsGoalMode(false);
             } else {
               setMode(topicKey);
@@ -45431,7 +45481,7 @@ function App() {
         {mode === 'vachana' ? (
           <Vachana onBack={() => setMode(null)} initialAdaptScore={diagnosticState[mode] || 0} />
         ) : (
-          <div className={`card ${mode === 'contrastlist' ? 'is-wide' : ''}`}>
+          <div className={`card ${mode === 'contrastlist' || (mode && mode.startsWith('contrast-')) ? 'is-wide' : ''}`}>
             {renderContent()}
           </div>
         )}
