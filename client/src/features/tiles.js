@@ -56,7 +56,7 @@ export const TILES = [
     { key: 'matrix', name: 'Matrices', subtitle: 'Add, multiply, determinant', color: 'blue', category: 'linear-algebra' },
     { key: 'mensur', name: 'Mensuration', subtitle: 'Area, volume, surface area', color: 'green', category: 'shape-space' },
     { key: 'mensuration-lab', name: 'Mensuration Lab', subtitle: 'Area, perimeter & volume through animated shapes', color: 'green', category: 'shape-space' },
-    { key: 'math-lab', name: '🔬 Visual Learning Universe', subtitle: 'Visual, Mensuration & Addition labs', color: 'orange', category: 'shape-space' },
+    { key: 'math-lab', name: '🔬 Visual Learning Universe', subtitle: 'Visual, Mensuration & Addition labs', color: 'orange', category: 'visual-universe' },
     { key: 'multiply', name: 'Multiplication', subtitle: 'Practice any times table (2–19)', color: 'purple', category: 'number-foundations' },
     { key: 'bases', name: 'Number Bases', subtitle: 'Binary, decimal, hexadecimal', color: 'green', category: 'number-foundations' },
     { key: 'basic-arith-lab', name: 'Origin', subtitle: 'Practice +, -, ×, ÷ with varied templates', color: 'blue', category: 'number-foundations', foldInto: 'basicarith' },
@@ -110,7 +110,7 @@ export const TILES = [
     { key: 'polygym', name: 'Polynomials', subtitle: 'Arithmetic → monomial algebra (MCQ)', color: 'blue', category: 'algebra', foldInto: 'polymul' },
     { key: 'water-jug-lab', name: '🧪 Water Jug Lab', subtitle: 'GCD discovery — 13-level progression', color: 'teal', category: 'shelf' },
     { key: 'equation-crafting-lab', name: '⚗️ Equation Crafting Lab', subtitle: 'Build expressions in the mixing pot', color: 'orange', category: 'algebra' },
-    { key: 'contrastlist', name: 'Contrast Challenge', subtitle: 'Distinguish similar concepts', color: 'featured', category: 'shelf' },
+    { key: 'contrastlist', name: 'Contrast Challenge', subtitle: 'Distinguish similar concepts', color: 'featured', category: 'contrast-challenge' },
     { key: 'carjourney', name: 'The Car Journey', subtitle: '16 stops from wheel counting to suspension equations', color: 'teal', category: 'real-world' },
 ]
 

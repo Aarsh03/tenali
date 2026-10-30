@@ -85,6 +85,22 @@ const HOME_SECTIONS = [
     subtitle: 'Phenomenon pathways, road trips & practical mathematics',
     color: 'teal',
   },
+  {
+    key: 'contrast-challenge',
+    title: 'Contrast Challenge',
+    icon: '⚖️',
+    subtitle: 'Distinguish similar concepts & avoid confusion (15 pairs)',
+    color: 'featured',
+    directMode: 'contrastlist',
+  },
+  {
+    key: 'visual-universe',
+    title: 'Visual Learning Universe',
+    icon: '🔬',
+    subtitle: 'Visual, Mensuration & Balance Scale interactive labs',
+    color: 'orange',
+    directMode: 'math-lab',
+  },
 ];
 
 /**
@@ -290,6 +306,7 @@ export default function Home({
           completedTopics={completedTopics}
           goldMastery={goldMastery}
           onSelectSection={setSelectedSection}
+          onSelect={onSelect}
         />
       )}
 
