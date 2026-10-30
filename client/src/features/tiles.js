@@ -99,8 +99,7 @@ export const TILES = [
     { key: 'vachana', name: 'Vachana', subtitle: 'Mathematical Literacy Lab', color: 'purple', category: 'language-words' },
     { key: 'vocab', name: 'Vocabulary', subtitle: 'Match words to definitions', color: 'green', category: 'language-words' },
     { key: 'spot', name: 'Twin Hunt', subtitle: 'Find the common object', color: 'purple', category: 'shelf' },
-    { key: 'treasurehunt', name: 'Treasure Hunt', subtitle: 'Solve & seek on a treasure grid', color: 'teal', category: 'shelf' },
-    { key: 'riddle', name: 'Math Riddles', subtitle: 'Find the hidden rule & solve puzzles', color: 'purple', category: 'shelf' },
+    { key: 'curiosity', name: 'Curiosity Mode', subtitle: 'Explore "What if" question variations', color: 'pink', category: 'shelf' },
     { key: 'gymdecimals', name: 'Decimals', subtitle: 'Signed decimal × decimal — 1-digit MCQ', color: 'purple', category: 'number-foundations', foldInto: 'decimals' },
     { key: 'guess', name: 'Guess the Number', subtitle: 'Binary magic trick — mind-reading game', color: 'blue', category: 'number-foundations', foldInto: 'bases' },
     { key: 'funcgym', name: 'Functions', subtitle: 'Evaluate small polynomials (MCQ)', color: 'blue', category: 'algebra', foldInto: 'funceval' },
@@ -127,6 +126,63 @@ export const TILES = [
     { key: 'contrast-radius-diameter', name: 'Radius vs Diameter', subtitle: 'Center to edge vs edge to edge through center', color: 'featured', category: 'contrast-challenge' },
     { key: 'contrast-trig-inverse-trig', name: 'Trig vs Inverse Trig', subtitle: 'Angle to side ratio vs ratio back to angle', color: 'featured', category: 'contrast-challenge' },
     { key: 'carjourney', name: 'The Car Journey', subtitle: '16 stops from wheel counting to suspension equations', color: 'teal', category: 'real-world' },
+
+    // Treasure Hunt (13 Worlds)
+    { key: 'treasurehunt-island-of-numbers', name: 'Island of Numbers', subtitle: '8 of 8 topics ready', color: 'blue', category: 'treasure-hunt', worldId: 'island-of-numbers' },
+    { key: 'treasurehunt-merchants-market', name: 'Merchant\'s Market', subtitle: '8 of 8 topics ready', color: 'green', category: 'treasure-hunt', worldId: 'merchants-market' },
+    { key: 'treasurehunt-number-theory-vault', name: 'Number Theory Vault', subtitle: '1 of 6 topics ready', color: 'purple', category: 'treasure-hunt', worldId: 'number-theory-vault' },
+    { key: 'treasurehunt-algebra-temple', name: 'Algebra Temple', subtitle: '4 of 7 topics ready', color: 'orange', category: 'treasure-hunt', worldId: 'algebra-temple' },
+    { key: 'treasurehunt-polynomial-peak', name: 'Polynomial Peak', subtitle: '3 of 6 topics ready', color: 'blue', category: 'treasure-hunt', worldId: 'polynomial-peak' },
+    { key: 'treasurehunt-calculus-cliffs', name: 'Calculus Cliffs', subtitle: '2 of 4 topics ready', color: 'teal', category: 'treasure-hunt', worldId: 'calculus-cliffs' },
+    { key: 'treasurehunt-matrix-vector-vault', name: 'Matrix & Vector Vault', subtitle: '4 of 5 topics ready', color: 'indigo', category: 'treasure-hunt', worldId: 'matrix-vector-vault' },
+    { key: 'treasurehunt-geometry-cave', name: 'Geometry Cave', subtitle: '8 of 8 topics ready', color: 'purple', category: 'treasure-hunt', worldId: 'geometry-cave' },
+    { key: 'treasurehunt-circle-coordinate-cove', name: 'Circle & Coordinate Cove', subtitle: '4 of 6 topics ready', color: 'teal', category: 'treasure-hunt', worldId: 'circle-coordinate-cove' },
+    { key: 'treasurehunt-trigonometry-tower', name: 'Trigonometry Tower', subtitle: '2 of 3 topics ready', color: 'orange', category: 'treasure-hunt', worldId: 'trigonometry-tower' },
+    { key: 'treasurehunt-data-logic-lab', name: 'Data & Logic Lab', subtitle: '4 of 5 topics ready', color: 'green', category: 'treasure-hunt', worldId: 'data-logic-lab' },
+    { key: 'treasurehunt-mixed-adventure', name: 'Mixed Adventure', subtitle: '48 of 48 topics ready', color: 'purple', category: 'treasure-hunt', worldId: 'mixed-adventure' },
+    { key: 'treasurehunt-endless-treasure', name: 'Endless Treasure', subtitle: '48 of 48 topics ready', color: 'red', category: 'treasure-hunt', worldId: 'endless-treasure' },
+
+    // Math Riddles (4 Types)
+    {
+      key: 'riddle-find-rule',
+      name: '🔍 Find the Rule',
+      subtitle: 'Study input → output pairs, spot the hidden formula, then apply it to a new input.',
+      example: '3 → 8, 7 → 12 ⇒ 9 → ?',
+      color: 'orange',
+      category: 'math-riddles',
+      riddleType: 'find-rule'
+    },
+    {
+      key: 'riddle-sequence',
+      name: '🔢 Number Sequence',
+      subtitle: 'Look at the pattern in a list of numbers and predict what comes next.',
+      example: '2, 4, 8, 16, ?',
+      color: 'purple',
+      category: 'math-riddles',
+      riddleType: 'sequence'
+    },
+    {
+      key: 'riddle-logic',
+      name: '🧩 Logic Puzzle',
+      subtitle: 'Read a word problem, reason it through step by step to reach the answer.',
+      example: 'If all Bloops are Razzies..',
+      color: 'teal',
+      category: 'math-riddles',
+      riddleType: 'logic'
+    },
+    {
+      key: 'riddle-image',
+      name: '🖼️ Visual Puzzle',
+      subtitle: 'Decode shapes, patterns and images — pick the option that completes the picture.',
+      example: 'Which piece fits the gap?',
+      color: 'green',
+      category: 'math-riddles',
+      riddleType: 'image'
+    },
+
+    // Coding Playground
+    { key: 'playground', name: 'Universal Code Playground', subtitle: 'Run code in 50+ languages with Judge0 (Python, C++, Java, JS, Rust, Go)', color: 'teal', category: 'coding-playground' },
+    { key: 'local-compiler', name: 'Local Fast Compiler', subtitle: 'Direct instant execution for C, C++, Python, Node, Java & more', color: 'blue', category: 'coding-playground' },
 ]
 
 // Hamburger-only entries (#190). Data only -- composition stays in App.jsx.

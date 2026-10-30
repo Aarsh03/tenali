@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FEATURED_TILES } from '../features/tiles';
 import { PmHamburgerItem } from '../PathMap';
-import { navigate } from '../lib/router';
 import './HomeNavMenu.css';
 
 function DropdownItem({ onClick, title, subtitle, style }) {
@@ -35,7 +34,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
 
   const hamburgerApps = [
     ...featuredApps,
-    { key: 'curiosity', name: 'Curiosity Mode', subtitle: 'Explore "What if" variations', color: 'pink' },
   ];
 
   const isSearching = search.trim() !== '';
@@ -48,11 +46,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
   const handleSelect = (key) => {
     setMenuOpen(false);
     onSelect(key);
-  };
-
-  const handleRedirect = (path) => {
-    setMenuOpen(false);
-    navigate(path);
   };
 
   return (
@@ -127,12 +120,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
             />
           )}
 
-          <DropdownItem
-            onClick={() => handleSelect('pathmap')}
-            title="📍 Learning Path"
-            subtitle="Prerequisite graph & personalized roadmap"
-          />
-
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
           {/* Section 2: Practice Modes & Quiz Builders */}
@@ -154,12 +141,6 @@ export default function HomeNavMenu({ onSelect, onOpenAbout, onOpenPmGoal, searc
           <div style={{ height: '1px', background: 'var(--clr-border)', margin: '4px 0' }} />
 
           {/* Section 3: Extended Hubs & Review */}
-          <DropdownItem
-            onClick={() => handleRedirect('/playground')}
-            title="💻 Code Playground"
-            subtitle="Run code in 50+ languages"
-          />
-
           <DropdownItem
             onClick={() => {
               setMenuOpen(false);

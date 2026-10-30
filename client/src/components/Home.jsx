@@ -11,6 +11,8 @@ import MenuCard from './MenuCard';
 import { PmQuestBanner, PmGoalModal, PmHomeSection } from '../PathMap';
 import { isStage3Completed } from '../features/progress';
 import './Home.css';
+import WorldPreviewModal from '../treasurehunt/WorldPreviewModal';
+import worldsData from '../treasurehunt/worldsData.json';
 
 const API = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -67,8 +69,8 @@ const HOME_SECTIONS = [
   {
     key: 'shelf',
     title: 'Puzzles & Play',
-    icon: '🧩',
-    subtitle: 'Battle Arena, Detective Agency, Sudoku, Treasure Hunt & Labs',
+    icon: '🎮',
+    subtitle: 'Battle Arena, Detective Agency, Sudoku, Curiosity Mode & Labs',
     color: 'orange',
   },
   {
@@ -98,6 +100,27 @@ const HOME_SECTIONS = [
     icon: '🔬',
     subtitle: 'Visual, Mensuration & Balance Scale interactive labs',
     color: 'orange',
+  },
+  {
+    key: 'treasure-hunt',
+    title: 'Treasure Hunt',
+    icon: '🗺️',
+    subtitle: 'Solve & seek across 13 mathematical adventure worlds',
+    color: 'teal',
+  },
+  {
+    key: 'math-riddles',
+    title: 'Math Riddles',
+    icon: '🧩',
+    subtitle: 'Find the hidden rule, sequence, logic & visual puzzles (4 types)',
+    color: 'purple',
+  },
+  {
+    key: 'coding-playground',
+    title: 'Coding Playground',
+    icon: '💻',
+    subtitle: 'Universal 50+ language runner & local direct compiler',
+    color: 'blue',
   },
 ];
 
@@ -166,13 +189,28 @@ export default function Home({
     setActiveSections([]);
   };
 
+  const [previewWorld, setPreviewWorld] = useState(null);
+
+  const handleCardSelect = (key) => {
+    if (typeof key === 'string' && (key.startsWith('treasurehunt-') || key.startsWith('treasurehunt_'))) {
+      const rawId = key.replace(/^treasurehunt[-_]/, '');
+      const worldId = rawId.replace(/_/g, '-');
+      const foundWorld = (Array.isArray(worldsData) ? worldsData : []).find((w) => w.id === worldId);
+      if (foundWorld) {
+        setPreviewWorld(foundWorld);
+        return;
+      }
+    }
+    onSelect(key);
+  };
+
   const renderMenuCard = (app) => (
     <MenuCard
       key={app.key}
       app={app}
       isCompleted={isStage3Completed(app.key, completedTopics)}
       isGold={Boolean(goldMastery && goldMastery.includes(app.key))}
-      onSelect={onSelect}
+      onSelect={handleCardSelect}
     />
   );
 
@@ -321,7 +359,27 @@ export default function Home({
         />
       )}
 
-      <PmGoalModal open={pmOpen} onClose={() => setPmOpen(false)} onSelect={onSelect} />
+      <PmGoalModal
+        open={pmOpen}
+        onClose={() => setPmOpen(false)}
+        onSelect={onSelect}
+        onOpenFullPage={() => {
+          setPmOpen(false);
+          onSelect('pathmap');
+        }}
+      />
+
+      <WorldPreviewModal
+        isOpen={Boolean(previewWorld)}
+        world={previewWorld}
+        onClose={() => setPreviewWorld(null)}
+        onContinue={() => {
+          if (!previewWorld) return;
+          const worldKey = `treasurehunt-${previewWorld.id}`;
+          setPreviewWorld(null);
+          onSelect(worldKey);
+        }}
+      />
     </>
   );
 }
